@@ -14,18 +14,18 @@ class Machine : public QObject
 public:
     explicit Machine(QObject *parent = nullptr);
     ~Machine();
+    void extracted(QList<QString> &list);
     void loadIniFile(QString &path);
     void start();
     void stop();
+    void reset();
 
 
     QString *brokerAddress() { return &_brokerAddress; }
     qint16 brokerPort() { return _brokerPort; }
     QString *pubTopic() { return &_pubTopic; }
     QString *subTopic() { return &_subTopic; }
-    Axis *x() { return &_x; }
-    Axis *y() { return &_y; }
-    Axis *z() { return &_z; }
+    Axis *axis(char const *name) { return _axes[name]; }
 
 signals:
     void dataHasChanged();
@@ -35,8 +35,8 @@ private:
     qint16 _brokerPort;
     QString _pubTopic;
     QString _subTopic;
-    Axis _x, _y, _z;
-    QHash<QString, Axis> _axes;
+    QList<char const *> _axesNames;
+    QHash<char const *, Axis *> _axes;
 
 };
 

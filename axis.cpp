@@ -28,7 +28,18 @@ void Axis::run() {
     qDebug() << "Starting thread for axis " << objectName();
     while (!isInterruptionRequested()) {
         count += p;
+        if (count > length * 1000 || count < 0) {
+            emit outOfLimits(objectName());
+            break;
+        }
         sleep(1);
     }
     qDebug() << "Stopped thread for axis " << objectName();
+}
+
+
+void Axis::reset() {
+    count = 0;
+    setpoint = 0;
+    _position = 0;
 }

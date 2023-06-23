@@ -14,8 +14,10 @@ public:
     ~Axis();
     QString inspect();
     void run() override;
+    void reset();
 
 signals:
+    void outOfLimits(QString const &axis);
 
 public:
     double length = 1;
@@ -25,12 +27,12 @@ public:
     double pitch = 0.01;
     double gravity = 0;
     useconds_t integration_dt = 5;
-    double p = 1, i = 0, d = 0;
-    int count = 0;
+    double p = 0, i = 0, d = 0;
+    double count = 0;
+    double setpoint = 0.0;
 
 private:
     double _position = 0;
-    double _setpoint = 0;
     double _speed = 0;
     double _time = 0;
     double _torque = 0;

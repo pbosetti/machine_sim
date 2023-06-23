@@ -4,6 +4,8 @@
 #include "machine.h"
 #include <QMainWindow>
 
+enum OnOff {On, Off};
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -21,6 +23,8 @@ private slots:
     void on_machineDataChanged();
 
     void on_startButton_clicked();
+    void on_formDataChanged();
+    void on_outOfLimits(QString const &name);
 
 private:
     Machine machine;
@@ -28,6 +32,8 @@ private:
     void dragEnterEvent(QDragEnterEvent *e);
     void dropEvent(QDropEvent *);
     void dragLeaveEvent(QDragLeaveEvent* event);
+    void syncData();
+    void toggleFormConections(enum OnOff);
     Ui::MainWindow *ui;
 
     bool _running = false;

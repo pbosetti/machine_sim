@@ -137,6 +137,20 @@
              </property>
             </widget>
            </item>
+           <item row="4" column="0">
+            <widget class="QLCDNumber" name="lcdNumber">
+             <property name="segmentStyle">
+              <enum>QLCDNumber::Flat</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QProgressBar" name="xPositionBar">
+             <property name="value">
+              <number>24</number>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -206,6 +220,20 @@
              </property>
             </widget>
            </item>
+           <item row="4" column="0">
+            <widget class="QLCDNumber" name="lcdNumber_2">
+             <property name="segmentStyle">
+              <enum>QLCDNumber::Flat</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QProgressBar" name="yPositionBar">
+             <property name="value">
+              <number>24</number>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -262,7 +290,7 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QSlider" name="setPintZSlider">
+            <widget class="QSlider" name="setPointZSlider">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -272,6 +300,20 @@
             <widget class="QLabel" name="label_16">
              <property name="text">
               <string>Set point</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLCDNumber" name="lcdNumber_3">
+             <property name="segmentStyle">
+              <enum>QLCDNumber::Flat</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QProgressBar" name="zPositionBar">
+             <property name="value">
+              <number>24</number>
              </property>
             </widget>
            </item>
@@ -336,5 +378,54 @@
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>xPositionBar</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>146</x>
+     <y>297</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>68</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>yPositionBar</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_2</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>415</x>
+     <y>301</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>zPositionBar</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_3</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>705</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>650</x>
+     <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

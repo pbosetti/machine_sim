@@ -14,11 +14,25 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setAcceptDrops(true);
+
+    connect(machine.axis("X"), SIGNAL(outOfLimits(QString)), this, SLOT(on_outOfLimits(QString)));
+    connect(machine.axis("Y"), SIGNAL(outOfLimits(QString)), this, SLOT(on_outOfLimits(QString)));
+    connect(machine.axis("Z"), SIGNAL(outOfLimits(QString)), this, SLOT(on_outOfLimits(QString)));
     connect(&machine, SIGNAL(dataHasChanged()), this, SLOT(on_machineDataChanged()));
+
+    toggleFormConections(On);
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this]() {
-        qDebug() << "Count: " << machine.x()->count;
+        int x = machine.axis("X")->count;
+        int y = machine.axis("Y")->count;
+        int z = machine.axis("Z")->count;
+//        qDebug() << "X Count: " + QString::number(x) +
+//                    ", Y Count: " + QString::number(y) +
+//                    ", Z Count: " + QString::number(z);
+        ui->xPositionBar->setValue(x);
+        ui->yPositionBar->setValue(y);
+        ui->zPositionBar->setValue(z);
     });
     timer->start(500);
 }
@@ -33,6 +47,7 @@ void MainWindow::on_machineDataChanged() {
     ui->brokerPortField->setValue(machine.brokerPort());
     ui->pubTopicField->setText(*machine.pubTopic());
     ui->subTopicField->setText(*machine.subTopic());
+    syncData();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *e)
@@ -90,4 +105,86 @@ void MainWindow::on_startButton_clicked()
 
 }
 
+void MainWindow::on_formDataChanged() {
+    machine.axis("X")->p = ui->xpSpinBox->value();
+    machine.axis("X")->i = ui->xiSpinBox->value();
+    machine.axis("X")->d = ui->xdSpinBox->value();
 
+    machine.axis("Y")->p = ui->ypSpinBox->value();
+    machine.axis("Y")->i = ui->yiSpinBox->value();
+    machine.axis("Y")->d = ui->ydSpinBox->value();
+
+    machine.axis("Z")->p = ui->zpSpinBox->value();
+    machine.axis("Z")->i = ui->ziSpinBox->value();
+    machine.axis("Z")->d = ui->zdSpinBox->value();
+
+    machine.axis("X")->setpoint = ui->setPointXSlider->value();
+    machine.axis("Y")->setpoint = ui->setPointXSlider->value();
+    machine.axis("Z")->setpoint = ui->setPointXSlider->value();
+}
+
+
+void MainWindow::on_outOfLimits(QString const &name) {
+    _running = false;
+    machine.stop();
+    machine.reset();
+    ui->startButton->setText("Start");
+    ui->statusbar->showMessage("Limits reached on axis " + name + ", stopping execution", 10000);
+}
+
+
+void MainWindow::syncData() {
+    toggleFormConections(Off);
+    ui->setPointXSlider->setMaximum(machine.axis("X")->length * 1000);
+    ui->setPointYSlider->setMaximum(machine.axis("Y")->length * 1000);
+    ui->setPointZSlider->setMaximum(machine.axis("Z")->length * 1000);
+
+    ui->xPositionBar->setMaximum(machine.axis("X")->length * 1000);
+    ui->yPositionBar->setMaximum(machine.axis("Y")->length * 1000);
+    ui->zPositionBar->setMaximum(machine.axis("Z")->length * 1000);
+
+    ui->xpSpinBox->setValue(machine.axis("X")->p);
+    ui->xiSpinBox->setValue(machine.axis("X")->i);
+    ui->xdSpinBox->setValue(machine.axis("X")->d);
+
+    ui->ypSpinBox->setValue(machine.axis("Y")->p);
+    ui->yiSpinBox->setValue(machine.axis("Y")->i);
+    ui->ydSpinBox->setValue(machine.axis("Y")->d);
+
+    ui->zpSpinBox->setValue(machine.axis("Z")->p);
+    ui->ziSpinBox->setValue(machine.axis("Z")->i);
+    ui->zdSpinBox->setValue(machine.axis("Z")->d);
+    toggleFormConections(On);
+}
+
+void MainWindow::toggleFormConections(enum OnOff state) {
+    if (On == state) {
+        connect(ui->xpSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+        connect(ui->xiSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+        connect(ui->xdSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+
+        connect(ui->ypSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+        connect(ui->yiSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+        connect(ui->ydSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+
+        connect(ui->zpSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+        connect(ui->ziSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+        connect(ui->zdSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
+
+        connect(ui->setPointXSlider, SIGNAL(valueChanged(int)), this, SLOT(on_formDataChanged()));
+        connect(ui->setPointYSlider, SIGNAL(valueChanged(int)), this, SLOT(on_formDataChanged()));
+        connect(ui->setPointZSlider, SIGNAL(valueChanged(int)), this, SLOT(on_formDataChanged()));
+    } else {
+        disconnect(ui->xpSpinBox, nullptr, nullptr, nullptr);
+        disconnect(ui->xiSpinBox, nullptr, nullptr, nullptr);
+        disconnect(ui->xdSpinBox, nullptr, nullptr, nullptr);
+
+        disconnect(ui->ypSpinBox, nullptr, nullptr, nullptr);
+        disconnect(ui->yiSpinBox, nullptr, nullptr, nullptr);
+        disconnect(ui->ydSpinBox, nullptr, nullptr, nullptr);
+
+        disconnect(ui->zpSpinBox, nullptr, nullptr, nullptr);
+        disconnect(ui->ziSpinBox, nullptr, nullptr, nullptr);
+        disconnect(ui->zdSpinBox, nullptr, nullptr, nullptr);
+    }
+}
