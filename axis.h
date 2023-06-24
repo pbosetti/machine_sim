@@ -36,6 +36,7 @@ private:
     double _speed = 0;
     double _time = 0;
     double _torque = 0;
+    QElapsedTimer *_timer;
 
 };
 

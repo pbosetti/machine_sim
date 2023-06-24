@@ -97,6 +97,7 @@ void MainWindow::on_startButton_clicked()
         machine.start();
         _running = true;
         ui->startButton->setText("Stop");
+        machine.timer->start();
     } else {
         machine.stop();
         _running = false;

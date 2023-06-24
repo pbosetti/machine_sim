@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QHash>
-
+#include <QElapsedTimer>
 
 class Machine : public QObject
 {
@@ -26,6 +26,8 @@ public:
     QString *pubTopic() { return &_pubTopic; }
     QString *subTopic() { return &_subTopic; }
     Axis *axis(char const *name) { return _axes[name]; }
+
+    QElapsedTimer *timer;
 
 signals:
     void dataHasChanged();

@@ -19,6 +19,7 @@ Machine::Machine(QObject *parent)
     _subTopic(QString("#"))
 {
     _axesNames = QList<char const *>({"X", "Y", "Z"});
+    timer = new QElapsedTimer();
     _axes["X"] = new Axis(this, "X");
     _axes["Y"] = new Axis(this, "Y");
     _axes["Z"] = new Axis(this, "Z");
