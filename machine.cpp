@@ -2,12 +2,16 @@
 #include "toml.hpp"
 #include <QDebug>
 #include <QList>
+#include <algorithm>
 
 QDebug operator<<(QDebug dbg, Machine *m)
 {
     QDebugStateSaver saver(dbg);
     dbg.nospace() << "Broker: " << *m->brokerAddress() + ":" + QString::number(m->brokerPort()) << "\n";
     dbg << "Publish on " << *m->pubTopic() << " - Subscribe to " << *m->subTopic() << "\n";
+    dbg << "Effective masses: X = " << QString::number(m->axis("X")->effective_mass) <<
+        ", Y = " << QString::number(m->axis("Y")->effective_mass) <<
+        ", Z = " << QString::number(m->axis("Z")->effective_mass) << "\n";
     return dbg;
 }
 
@@ -48,8 +52,7 @@ void Machine::loadIniFile(QString &path) {
         _axes[axisName]->i = config[axisName]["i"].value_or(0.0);
         _axes[axisName]->d = config[axisName]["d"].value_or(0.0);
     }
-
-    qDebug() << this;
+    link_axes({"Z", "Y", "X"});
     emit dataHasChanged();
 }
 
@@ -72,3 +75,11 @@ void Machine::reset() {
     emit dataHasChanged();
 }
 
+double Machine::link_axes(QList<char const *> names) {
+    double mass = 0;
+    for (char const *axis : names) {
+        mass += _axes[axis]->mass;
+        _axes[axis]->effective_mass = mass;
+    }
+    return mass;
+}

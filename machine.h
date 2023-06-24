@@ -19,6 +19,7 @@ public:
     void start();
     void stop();
     void reset();
+    double link_axes(QList<char const *>);
 
 
     QString *brokerAddress() { return &_brokerAddress; }

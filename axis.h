@@ -23,6 +23,7 @@ public:
     double length = 1;
     double friction = 1000;
     double mass = 150;
+    double effective_mass = mass;
     double max_torque = 20;
     double pitch = 0.01;
     double gravity = 0;

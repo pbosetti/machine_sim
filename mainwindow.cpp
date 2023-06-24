@@ -15,13 +15,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setAcceptDrops(true);
 
+    // Out of limits signal
     connect(machine.axis("X"), SIGNAL(outOfLimits(QString)), this, SLOT(on_outOfLimits(QString)));
     connect(machine.axis("Y"), SIGNAL(outOfLimits(QString)), this, SLOT(on_outOfLimits(QString)));
     connect(machine.axis("Z"), SIGNAL(outOfLimits(QString)), this, SLOT(on_outOfLimits(QString)));
+
+    // when INI file loaded, update GUI
     connect(&machine, SIGNAL(dataHasChanged()), this, SLOT(on_machineDataChanged()));
 
+    // Enable signals from GUI form to machine
     toggleFormConections(On);
 
+    // Timed action for reading data from axes
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [this]() {
         int x = machine.axis("X")->count;
@@ -42,6 +47,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+// Update GUI when a new INI file is loaded
 void MainWindow::on_machineDataChanged() {
     ui->brokerAddressField->setText(*machine.brokerAddress());
     ui->brokerPortField->setValue(machine.brokerPort());
@@ -50,6 +56,26 @@ void MainWindow::on_machineDataChanged() {
     syncData();
 }
 
+// Update machine when GUI data change
+void MainWindow::on_formDataChanged() {
+    machine.axis("X")->p = ui->xpSpinBox->value();
+    machine.axis("X")->i = ui->xiSpinBox->value();
+    machine.axis("X")->d = ui->xdSpinBox->value();
+
+    machine.axis("Y")->p = ui->ypSpinBox->value();
+    machine.axis("Y")->i = ui->yiSpinBox->value();
+    machine.axis("Y")->d = ui->ydSpinBox->value();
+
+    machine.axis("Z")->p = ui->zpSpinBox->value();
+    machine.axis("Z")->i = ui->ziSpinBox->value();
+    machine.axis("Z")->d = ui->zdSpinBox->value();
+
+    machine.axis("X")->setpoint = ui->setPointXSlider->value();
+    machine.axis("Y")->setpoint = ui->setPointYSlider->value();
+    machine.axis("Z")->setpoint = ui->setPointZSlider->value();
+}
+
+// Accept dragged INI file
 void MainWindow::dragEnterEvent(QDragEnterEvent *e)
 {
     if (e->mimeData()->hasUrls()) {
@@ -74,6 +100,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent*)
     statusBar()->clearMessage();
 }
 
+// Load dragged INI file into machine
 void MainWindow::dropEvent(QDropEvent *e)
 {
     QUrl url = e->mimeData()->urls().first();
@@ -90,7 +117,7 @@ void MainWindow::on_action_Open_INI_file_triggered()
     machine.loadIniFile(fileName);
 }
 
-
+// Start/stop simulation
 void MainWindow::on_startButton_clicked()
 {
     if (!_running) {
@@ -106,25 +133,7 @@ void MainWindow::on_startButton_clicked()
 
 }
 
-void MainWindow::on_formDataChanged() {
-    machine.axis("X")->p = ui->xpSpinBox->value();
-    machine.axis("X")->i = ui->xiSpinBox->value();
-    machine.axis("X")->d = ui->xdSpinBox->value();
-
-    machine.axis("Y")->p = ui->ypSpinBox->value();
-    machine.axis("Y")->i = ui->yiSpinBox->value();
-    machine.axis("Y")->d = ui->ydSpinBox->value();
-
-    machine.axis("Z")->p = ui->zpSpinBox->value();
-    machine.axis("Z")->i = ui->ziSpinBox->value();
-    machine.axis("Z")->d = ui->zdSpinBox->value();
-
-    machine.axis("X")->setpoint = ui->setPointXSlider->value();
-    machine.axis("Y")->setpoint = ui->setPointXSlider->value();
-    machine.axis("Z")->setpoint = ui->setPointXSlider->value();
-}
-
-
+// One of the exes reaches its limit
 void MainWindow::on_outOfLimits(QString const &name) {
     _running = false;
     machine.stop();
@@ -158,6 +167,8 @@ void MainWindow::syncData() {
     toggleFormConections(On);
 }
 
+
+// Enables/disables connections: if not, there's a backlash on INI drag'n'drop
 void MainWindow::toggleFormConections(enum OnOff state) {
     if (On == state) {
         connect(ui->xpSpinBox, SIGNAL(valueChanged(double)), this, SLOT(on_formDataChanged()));
