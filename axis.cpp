@@ -4,6 +4,13 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 
+//   _     _  __                      _      
+//  | |   (_)/ _| ___  ___ _   _  ___| | ___ 
+//  | |   | | |_ / _ \/ __| | | |/ __| |/ _ \
+//  | |___| |  _|  __/ (__| |_| | (__| |  __/
+//  |_____|_|_|  \___|\___|\__, |\___|_|\___|
+//                         |___/             
+
 Axis::Axis(QObject *parent, QString name) : QThread(parent) {
   setObjectName(name);
   qDebug() << "Created axis " << this->objectName();
@@ -16,6 +23,13 @@ Axis::~Axis() {
   requestInterruption();
   wait();
 }
+
+//    ___                       _   _                 
+//   / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___ 
+//  | | | | '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \/ __|
+//  | |_| | |_) |  __/ | | (_| | |_| | (_) | | | \__ \
+//   \___/| .__/ \___|_|  \__,_|\__|_|\___/|_| |_|___/
+//        |_|                                         
 
 void Axis::run() {
   qDebug() << "Starting thread for axis " << objectName()

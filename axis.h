@@ -8,14 +8,17 @@
 class Axis : public QThread {
   Q_OBJECT
 public:
+  // Lifecycle
   explicit Axis(QObject *parent = nullptr, QString name = "_");
   ~Axis();
+  // Operations
   void run() override;
   void reset();
 
 signals:
   void outOfLimits(QString const &axis);
 
+  // Attributes
 public:
   double length = 1;
   double friction = 1000;
@@ -29,6 +32,7 @@ public:
   double count = 0;
   double setpoint = 0.0;
 
+  // Attributes
 private:
   double _position = 0;
   double _speed = 0;

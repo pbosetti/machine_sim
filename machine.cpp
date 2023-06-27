@@ -12,11 +12,18 @@ QDebug operator<<(QDebug dbg, Machine *m) {
   dbg << "Publish on " << *m->pubTopic() << " - Subscribe to " << *m->subTopic()
       << "\n";
   dbg << "Effective masses: X = "
-      << QString::number(m->axis("X")->effective_mass)
-      << ", Y = " << QString::number(m->axis("Y")->effective_mass)
-      << ", Z = " << QString::number(m->axis("Z")->effective_mass) << "\n";
+      << QString::number((*m)["X"]->effective_mass)
+      << ", Y = " << QString::number((*m)["Y"]->effective_mass)
+      << ", Z = " << QString::number((*m)["Z"]->effective_mass) << "\n";
   return dbg;
 }
+
+//   _     _  __                      _      
+//  | |   (_)/ _| ___  ___ _   _  ___| | ___ 
+//  | |   | | |_ / _ \/ __| | | |/ __| |/ _ \
+//  | |___| |  _|  __/ (__| |_| | (__| |  __/
+//  |_____|_|_|  \___|\___|\__, |\___|_|\___|
+//                         |___/             
 
 Machine::Machine(QObject *parent)
     : QObject(parent), _brokerAddress(QString("localhost")), _brokerPort(1883),
@@ -29,6 +36,13 @@ Machine::Machine(QObject *parent)
 }
 
 Machine::~Machine() { stop(); }
+
+//    ___                       _   _                 
+//   / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___ 
+//  | | | | '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \/ __|
+//  | |_| | |_) |  __/ | | (_| | |_| | (_) | | | \__ \
+//   \___/| .__/ \___|_|  \__,_|\__|_|\___/|_| |_|___/
+//        |_|                                         
 
 void Machine::loadIniFile(QString &path) {
   auto config = toml::parse_file(path.toStdString());
@@ -51,6 +65,7 @@ void Machine::loadIniFile(QString &path) {
     _axes[axisName]->d = config[axisName]["d"].value_or(0.0);
   }
   link_axes({"Z", "Y", "X"});
+  qDebug() << "Machine:\n" << this;
   emit dataHasChanged();
 }
 
