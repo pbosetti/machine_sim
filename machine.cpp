@@ -4,27 +4,29 @@
 #include <QList>
 #include <algorithm>
 
+
 QDebug operator<<(QDebug dbg, Machine *m) {
   QDebugStateSaver saver(dbg);
-  dbg.nospace() << "Broker: "
+  dbg.nospace().noquote() << " Broker: "
                 << *m->brokerAddress() + ":" + QString::number(m->brokerPort())
                 << "\n";
-  dbg << "Publish on " << *m->pubTopic() << " - Subscribe to " << *m->subTopic()
+  dbg << " Publish on " << *m->pubTopic() << " - Subscribe to " << *m->subTopic()
       << "\n";
-  dbg << "Effective masses: X = "
-      << QString::number((*m)["X"]->effective_mass)
-      << ", Y = " << QString::number((*m)["Y"]->effective_mass)
-      << ", Z = " << QString::number((*m)["Z"]->effective_mass) << "\n";
-  dbg << "Setpoint: X = "
-      << QString::number((*m)["X"]->setpoint)
-      << ", Y = " << QString::number((*m)["Y"]->setpoint)
-      << ", Z = " << QString::number((*m)["Z"]->setpoint) << "\n";
-  dbg << "Position: X = "
-      << QString::number((*m)["X"]->position())
-      << ", Y = " << QString::number((*m)["Y"]->position())
-      << ", Z = " << QString::number((*m)["Z"]->position()) << "\n";
+  dbg << " Effective masses: X = "
+      << QString::number((*m)[AxisTag::X]->effective_mass)
+      << ", Y = " << QString::number((*m)[AxisTag::Y]->effective_mass)
+      << ", Z = " << QString::number((*m)[AxisTag::Z]->effective_mass) << "\n";
+  dbg << " Setpoint: X = "
+      << QString::number((*m)[AxisTag::X]->setpoint)
+      << ", Y = " << QString::number((*m)[AxisTag::Y]->setpoint)
+      << ", Z = " << QString::number((*m)[AxisTag::Z]->setpoint) << "\n";
+  dbg << " Position: X = "
+      << QString::number((*m)[AxisTag::X]->position())
+      << ", Y = " << QString::number((*m)[AxisTag::Y]->position())
+      << ", Z = " << QString::number((*m)[AxisTag::Z]->position()) << "\n";
   return dbg;
 }
+
 
 //   _     _  __                      _      
 //  | |   (_)/ _| ___  ___ _   _  ___| | ___ 
@@ -36,11 +38,12 @@ QDebug operator<<(QDebug dbg, Machine *m) {
 Machine::Machine(QObject *parent)
     : QObject(parent), _brokerAddress(QString("localhost")), _brokerPort(1883),
       _pubTopic(QString("#")), _subTopic(QString("#")) {
-  _axesNames = QList<char const *>({"X", "Y", "Z"});
+  _axesTags = QList<AxisTag>({AxisTag::X, AxisTag::Y, AxisTag::Z});
+  _axesNames = QHash<AxisTag, char const *>({{AxisTag::X, "X"}, {AxisTag::Y, "Y"}, {AxisTag::Z, "Z"}});
   timer = new QElapsedTimer();
-  _axes["X"] = new Axis(this, "X");
-  _axes["Y"] = new Axis(this, "Y");
-  _axes["Z"] = new Axis(this, "Z");
+  _axes[AxisTag::X] = new Axis(this, "X");
+  _axes[AxisTag::Y] = new Axis(this, "Y");
+  _axes[AxisTag::Z] = new Axis(this, "Z");
 }
 
 Machine::~Machine() { stop(); }
@@ -59,46 +62,46 @@ void Machine::loadIniFile(QString &path) {
   _subTopic = config["MQTT"]["pub_topic"].value_or("c-cnc/#");
   _pubTopic = config["MQTT"]["sub_topic"].value_or("c-cnc/#");
 
-  for (char const *axisName : _axesNames) {
-    _axes[axisName]->length = config[axisName]["length"].value_or(1.0);
-    _axes[axisName]->friction = config[axisName]["friction"].value_or(1000.0);
-    _axes[axisName]->mass = config[axisName]["mass"].value_or(150.0);
-    _axes[axisName]->max_torque = config[axisName]["max_torque"].value_or(20.0);
-    _axes[axisName]->pitch = config[axisName]["pitch"].value_or(0.01);
-    _axes[axisName]->gravity = config[axisName]["gravity"].value_or(0.0);
-    _axes[axisName]->integration_dt =
-        config[axisName]["integration_dt"].value_or(5);
-    _axes[axisName]->p = config[axisName]["p"].value_or(1.0);
-    _axes[axisName]->i = config[axisName]["i"].value_or(0.0);
-    _axes[axisName]->d = config[axisName]["d"].value_or(0.0);
+  for (AxisTag axis : _axesTags) {
+    _axes[axis]->length = config[_axesNames[axis]]["length"].value_or(1.0);
+    _axes[axis]->friction = config[_axesNames[axis]]["friction"].value_or(1000.0);
+    _axes[axis]->mass = config[_axesNames[axis]]["mass"].value_or(150.0);
+    _axes[axis]->max_torque = config[_axesNames[axis]]["max_torque"].value_or(20.0);
+    _axes[axis]->pitch = config[_axesNames[axis]]["pitch"].value_or(0.01);
+    _axes[axis]->gravity = config[_axesNames[axis]]["gravity"].value_or(0.0);
+    _axes[axis]->integration_dt =
+        config[_axesNames[axis]]["integration_dt"].value_or(5);
+    _axes[axis]->p = config[_axesNames[axis]]["p"].value_or(1.0);
+    _axes[axis]->i = config[_axesNames[axis]]["i"].value_or(0.0);
+    _axes[axis]->d = config[_axesNames[axis]]["d"].value_or(0.0);
   }
-  link_axes({"Z", "Y", "X"});
+  link_axes({AxisTag::Z, AxisTag::Y, AxisTag::X});
   qDebug() << "Machine:\n" << this;
   emit dataHasChanged();
 }
 
 void Machine::start() {
-  for (char const *axis : _axesNames) {
+  for (AxisTag axis : _axesTags) {
     _axes[axis]->start();
   }
 }
 
 void Machine::stop() {
-  for (char const *axis : _axesNames) {
+  for (AxisTag axis : _axesTags) {
     _axes[axis]->requestInterruption();
   }
 }
 
 void Machine::reset() {
-  for (char const *axis : _axesNames) {
+  for (AxisTag axis : _axesTags) {
     _axes[axis]->reset();
   }
   emit dataHasChanged();
 }
 
-double Machine::link_axes(QList<char const *> names) {
+double Machine::link_axes(QList<AxisTag> names) {
   double mass = 0;
-  for (char const *axis : names) {
+  for (AxisTag axis : names) {
     mass += _axes[axis]->mass;
     _axes[axis]->effective_mass = mass;
   }
@@ -106,5 +109,5 @@ double Machine::link_axes(QList<char const *> names) {
 }
 
 void Machine::describe() {
-  qDebug() << "Machine:\n" << this;
+  qDebug().nospace() << "Machine:\n" << this;
 }

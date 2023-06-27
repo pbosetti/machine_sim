@@ -8,8 +8,12 @@
 #include <QHash>
 #include <QObject>
 
+//typedef enum {X, Y, Z} axisTag;
+enum class AxisTag {X, Y, Z};
+
 class Machine : public QObject {
   Q_OBJECT
+
 public:
   // Lifecycle
   explicit Machine(QObject *parent = nullptr);
@@ -21,7 +25,7 @@ public:
   void start();
   void stop();
   void reset();
-  double link_axes(QList<char const *>);
+  double link_axes(QList<AxisTag>);
   void describe();
 
   // Getters
@@ -29,13 +33,15 @@ public:
   qint16 brokerPort() { return _brokerPort; }
   QString *pubTopic() { return &_pubTopic; }
   QString *subTopic() { return &_subTopic; }
-  Axis *operator[](char const *name) {
+  Axis *operator[](AxisTag name) {
     if (!_axesNames.contains(name)) {
-      qDebug() << "Wrong axis " + QString(name);
+      qDebug() << "Wrong axis " + QString(_axesNames[name]);
       return nullptr;
     }
     return _axes[name];
   };
+  QList<AxisTag> *axesTags() { return &_axesTags; }
+  QHash<AxisTag, char const *> *axesNames() { return &_axesNames; }
 
   // Attributes
 public:
@@ -45,8 +51,9 @@ private:
   qint16 _brokerPort;
   QString _pubTopic;
   QString _subTopic;
-  QList<char const *> _axesNames;
-  QHash<char const *, Axis *> _axes;
+  QList<AxisTag> _axesTags;
+  QHash<AxisTag, char const *> _axesNames;
+  QHash<AxisTag, Axis *> _axes;
 
   // Signals
 signals:

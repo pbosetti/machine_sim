@@ -35,7 +35,7 @@ void Axis::run() {
   qDebug() << "Starting thread for axis " << objectName()
            << " at time " + QString::number(_timer->nsecsElapsed());
   while (!isInterruptionRequested()) {
-    count += setpoint;
+    count += setpoint * length * 1000;
     if (count > length * 1000 || count < 0) {
       emit outOfLimits(objectName());
       break;
@@ -48,6 +48,8 @@ void Axis::run() {
 
 void Axis::reset() {
   count = 0;
-  setpoint = 0;
-  _position = 0;
+  setpoint = length / 2.0;
+  _position = length / 2.0;
+  _speed = 0;
+  _torque = 0;
 }

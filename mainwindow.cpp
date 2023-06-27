@@ -24,12 +24,14 @@ MainWindow::MainWindow(QWidget *parent)
   setAcceptDrops(true);
 
   // Out of limits signal
-  connect(_machine["X"], SIGNAL(outOfLimits(QString)), this,
-          SLOT(on_outOfLimits(QString)));
-  connect(_machine["Y"], SIGNAL(outOfLimits(QString)), this,
-          SLOT(on_outOfLimits(QString)));
-  connect(_machine["Z"], SIGNAL(outOfLimits(QString)), this,
-          SLOT(on_outOfLimits(QString)));
+  for (AxisTag axis : *_machine.axesTags()) {
+    connect(_machine[axis], SIGNAL(outOfLimits(QString)), this,
+             SLOT(on_outOfLimits(QString)));
+  }
+//  connect(_machine[AxisTag::Y], SIGNAL(outOfLimits(QString)), this,
+//          SLOT(on_outOfLimits(QString)));
+//  connect(_machine[AxisTag::Z], SIGNAL(outOfLimits(QString)), this,
+//          SLOT(on_outOfLimits(QString)));
 
   // when INI file loaded, update GUI
   connect(&_machine, SIGNAL(dataHasChanged()), this,
@@ -52,9 +54,9 @@ MainWindow::MainWindow(QWidget *parent)
   // Timed action for reading data from axes
   QTimer *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [this]() {
-    int x = _machine["X"]->count;
-    int y = _machine["Y"]->count;
-    int z = _machine["Z"]->count;
+    int x = _machine[AxisTag::X]->count;
+    int y = _machine[AxisTag::Y]->count;
+    int z = _machine[AxisTag::Z]->count;
 
     ui->xPositionBar->setValue(x);
     ui->yPositionBar->setValue(y);
@@ -83,21 +85,21 @@ void MainWindow::on_machineDataChanged() {
 
 void MainWindow::syncData() {
   toggleFormConections(Off);
-  ui->xPositionBar->setMaximum(_machine["X"]->length * 1000);
-  ui->yPositionBar->setMaximum(_machine["Y"]->length * 1000);
-  ui->zPositionBar->setMaximum(_machine["Z"]->length * 1000);
+  ui->xPositionBar->setMaximum(_machine[AxisTag::X]->length * 1000);
+  ui->yPositionBar->setMaximum(_machine[AxisTag::Y]->length * 1000);
+  ui->zPositionBar->setMaximum(_machine[AxisTag::Z]->length * 1000);
   
-  ui->xpSpinBox->setValue(_machine["X"]->p);
-  ui->xiSpinBox->setValue(_machine["X"]->i);
-  ui->xdSpinBox->setValue(_machine["X"]->d);
+  ui->xpSpinBox->setValue(_machine[AxisTag::X]->p);
+  ui->xiSpinBox->setValue(_machine[AxisTag::X]->i);
+  ui->xdSpinBox->setValue(_machine[AxisTag::X]->d);
   
-  ui->ypSpinBox->setValue(_machine["Y"]->p);
-  ui->yiSpinBox->setValue(_machine["Y"]->i);
-  ui->ydSpinBox->setValue(_machine["Y"]->d);
+  ui->ypSpinBox->setValue(_machine[AxisTag::Y]->p);
+  ui->yiSpinBox->setValue(_machine[AxisTag::Y]->i);
+  ui->ydSpinBox->setValue(_machine[AxisTag::Y]->d);
   
-  ui->zpSpinBox->setValue(_machine["Z"]->p);
-  ui->ziSpinBox->setValue(_machine["Z"]->i);
-  ui->zdSpinBox->setValue(_machine["Z"]->d);
+  ui->zpSpinBox->setValue(_machine[AxisTag::Z]->p);
+  ui->ziSpinBox->setValue(_machine[AxisTag::Z]->i);
+  ui->zdSpinBox->setValue(_machine[AxisTag::Z]->d);
 
   ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
   ui->setPointYSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
@@ -206,21 +208,21 @@ void MainWindow::dropEvent(QDropEvent *e) {
 
 // Update machine when GUI data change
 void MainWindow::on_formDataChanged() {
-  _machine["X"]->p = ui->xpSpinBox->value();
-  _machine["X"]->i = ui->xiSpinBox->value();
-  _machine["X"]->d = ui->xdSpinBox->value();
+  _machine[AxisTag::X]->p = ui->xpSpinBox->value();
+  _machine[AxisTag::X]->i = ui->xiSpinBox->value();
+  _machine[AxisTag::X]->d = ui->xdSpinBox->value();
   
-  _machine["Y"]->p = ui->ypSpinBox->value();
-  _machine["Y"]->i = ui->yiSpinBox->value();
-  _machine["Y"]->d = ui->ydSpinBox->value();
+  _machine[AxisTag::Y]->p = ui->ypSpinBox->value();
+  _machine[AxisTag::Y]->i = ui->yiSpinBox->value();
+  _machine[AxisTag::Y]->d = ui->ydSpinBox->value();
   
-  _machine["Z"]->p = ui->zpSpinBox->value();
-  _machine["Z"]->i = ui->ziSpinBox->value();
-  _machine["Z"]->d = ui->zdSpinBox->value();
+  _machine[AxisTag::Z]->p = ui->zpSpinBox->value();
+  _machine[AxisTag::Z]->i = ui->ziSpinBox->value();
+  _machine[AxisTag::Z]->d = ui->zdSpinBox->value();
   
-  _machine["X"]->setpoint = ui->setPointXSlider->value() / SETPOINT_SLIDER_MAX * _machine["X"]->length;
-  _machine["Y"]->setpoint = ui->setPointYSlider->value() / SETPOINT_SLIDER_MAX * _machine["Y"]->length;
-  _machine["Z"]->setpoint = ui->setPointZSlider->value() / SETPOINT_SLIDER_MAX * _machine["Z"]->length;
+  _machine[AxisTag::X]->setpoint = ui->setPointXSlider->value() / SETPOINT_SLIDER_MAX * _machine[AxisTag::X]->length;
+  _machine[AxisTag::Y]->setpoint = ui->setPointYSlider->value() / SETPOINT_SLIDER_MAX * _machine[AxisTag::Y]->length;
+  _machine[AxisTag::Z]->setpoint = ui->setPointZSlider->value() / SETPOINT_SLIDER_MAX * _machine[AxisTag::Z]->length;
 }
 
 
@@ -242,6 +244,7 @@ void MainWindow::on_startButtonClicked() {
     _machine.timer->start();
   } else {
     _machine.stop();
+    _machine.reset();
     _running = false;
     ui->startButton->setText("Start");
   }
