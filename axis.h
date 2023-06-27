@@ -12,7 +12,6 @@ class Axis : public QThread
 public:
     explicit Axis(QObject *parent = nullptr, QString name = "_");
     ~Axis();
-    QString inspect();
     void run() override;
     void reset();
 
