@@ -38,15 +38,17 @@ MainWindow::MainWindow(QWidget *parent)
   // Enable signals from GUI form to machine
   toggleFormConections(On);
 
+  // disable start button on load (requires loading a INI file first)
+  ui->startButton->setEnabled(false);
+  ui->startButton->setToolTip("Load an INI file first");
+
   // Timed action for reading data from axes
   QTimer *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [this]() {
     int x = _machine["X"]->count;
     int y = _machine["Y"]->count;
     int z = _machine["Z"]->count;
-    //        qDebug() << "X Count: " + QString::number(x) +
-    //                    ", Y Count: " + QString::number(y) +
-    //                    ", Z Count: " + QString::number(z);
+
     ui->xPositionBar->setValue(x);
     ui->yPositionBar->setValue(y);
     ui->zPositionBar->setValue(z);
@@ -77,6 +79,10 @@ void MainWindow::syncData() {
   ui->setPointXSlider->setMaximum(_machine["X"]->length * 1000);
   ui->setPointYSlider->setMaximum(_machine["Y"]->length * 1000);
   ui->setPointZSlider->setMaximum(_machine["Z"]->length * 1000);
+
+  ui->setPointXSlider->setValue(_machine["X"]->length * 500);
+  ui->setPointYSlider->setValue(_machine["Y"]->length * 5000);
+  ui->setPointZSlider->setValue(_machine["Z"]->length * 500);
   
   ui->xPositionBar->setMaximum(_machine["X"]->length * 1000);
   ui->yPositionBar->setMaximum(_machine["Y"]->length * 1000);
@@ -177,6 +183,8 @@ void MainWindow::dropEvent(QDropEvent *e) {
   QString fileName = url.toLocalFile();
   statusBar()->showMessage(QString("Opening ") + fileName);
   _machine.loadIniFile(fileName);
+  ui->startButton->setEnabled(true);
+  ui->startButton->setToolTip("Start simulation");
 }
 
 //   ____  _       _       
@@ -212,6 +220,8 @@ void MainWindow::on_action_Open_INI_file_triggered() {
   if (fileName.isNull())
     return;
   _machine.loadIniFile(fileName);
+  ui->startButton->setEnabled(true);
+  ui->startButton->setToolTip("Start simulation");
 }
 
 // Start/stop simulation
