@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "machine.h"
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
@@ -7,6 +8,8 @@
 #include <QFileDialog>
 #include <QMimeData>
 #include <QTimer>
+
+#define SETPOINT_SLIDER_MAX 100.0f
 
 //   _     _  __                      _      
 //  | |   (_)/ _| ___  ___ _   _  ___| | ___ 
@@ -42,6 +45,10 @@ MainWindow::MainWindow(QWidget *parent)
   ui->startButton->setEnabled(false);
   ui->startButton->setToolTip("Load an INI file first");
 
+  ui->setPointXSlider->setMaximum(SETPOINT_SLIDER_MAX);
+  ui->setPointYSlider->setMaximum(SETPOINT_SLIDER_MAX);
+  ui->setPointZSlider->setMaximum(SETPOINT_SLIDER_MAX);
+
   // Timed action for reading data from axes
   QTimer *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [this]() {
@@ -76,14 +83,6 @@ void MainWindow::on_machineDataChanged() {
 
 void MainWindow::syncData() {
   toggleFormConections(Off);
-  ui->setPointXSlider->setMaximum(_machine["X"]->length * 1000);
-  ui->setPointYSlider->setMaximum(_machine["Y"]->length * 1000);
-  ui->setPointZSlider->setMaximum(_machine["Z"]->length * 1000);
-
-  ui->setPointXSlider->setValue(_machine["X"]->length * 500);
-  ui->setPointYSlider->setValue(_machine["Y"]->length * 5000);
-  ui->setPointZSlider->setValue(_machine["Z"]->length * 500);
-  
   ui->xPositionBar->setMaximum(_machine["X"]->length * 1000);
   ui->yPositionBar->setMaximum(_machine["Y"]->length * 1000);
   ui->zPositionBar->setMaximum(_machine["Z"]->length * 1000);
@@ -99,6 +98,10 @@ void MainWindow::syncData() {
   ui->zpSpinBox->setValue(_machine["Z"]->p);
   ui->ziSpinBox->setValue(_machine["Z"]->i);
   ui->zdSpinBox->setValue(_machine["Z"]->d);
+
+  ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  ui->setPointYSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  ui->setPointZSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
   toggleFormConections(On);
 }
 
@@ -147,6 +150,14 @@ void MainWindow::toggleFormConections(enum OnOff state) {
   }
 }
 
+void MainWindow::setupMachineAfterNewINI() {
+  ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  ui->setPointYSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  ui->setPointZSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  ui->startButton->setEnabled(true);
+  ui->startButton->setToolTip("Start simulation");
+}
+
 //   _____                 _       
 //  | ____|_   _____ _ __ | |_ ___ 
 //  |  _| \ \ / / _ \ '_ \| __/ __|
@@ -183,8 +194,7 @@ void MainWindow::dropEvent(QDropEvent *e) {
   QString fileName = url.toLocalFile();
   statusBar()->showMessage(QString("Opening ") + fileName);
   _machine.loadIniFile(fileName);
-  ui->startButton->setEnabled(true);
-  ui->startButton->setToolTip("Start simulation");
+  setupMachineAfterNewINI();
 }
 
 //   ____  _       _       
@@ -208,9 +218,9 @@ void MainWindow::on_formDataChanged() {
   _machine["Z"]->i = ui->ziSpinBox->value();
   _machine["Z"]->d = ui->zdSpinBox->value();
   
-  _machine["X"]->setpoint = ui->setPointXSlider->value();
-  _machine["Y"]->setpoint = ui->setPointYSlider->value();
-  _machine["Z"]->setpoint = ui->setPointZSlider->value();
+  _machine["X"]->setpoint = ui->setPointXSlider->value() / SETPOINT_SLIDER_MAX * _machine["X"]->length;
+  _machine["Y"]->setpoint = ui->setPointYSlider->value() / SETPOINT_SLIDER_MAX * _machine["Y"]->length;
+  _machine["Z"]->setpoint = ui->setPointZSlider->value() / SETPOINT_SLIDER_MAX * _machine["Z"]->length;
 }
 
 
@@ -220,8 +230,7 @@ void MainWindow::on_action_Open_INI_file_triggered() {
   if (fileName.isNull())
     return;
   _machine.loadIniFile(fileName);
-  ui->startButton->setEnabled(true);
-  ui->startButton->setToolTip("Start simulation");
+  setupMachineAfterNewINI();
 }
 
 // Start/stop simulation
@@ -246,5 +255,11 @@ void MainWindow::on_outOfLimits(QString const &name) {
   ui->startButton->setText("Start");
   ui->statusbar->showMessage(
       "Limits reached on axis " + name + ", stopping execution", 10000);
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+  _machine.describe();
 }
 

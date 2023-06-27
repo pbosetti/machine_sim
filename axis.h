@@ -32,6 +32,9 @@ public:
   double count = 0;
   double setpoint = 0.0;
 
+  // Getters
+  double position() { return _position; }
+
   // Attributes
 private:
   double _position = 0;

@@ -15,6 +15,14 @@ QDebug operator<<(QDebug dbg, Machine *m) {
       << QString::number((*m)["X"]->effective_mass)
       << ", Y = " << QString::number((*m)["Y"]->effective_mass)
       << ", Z = " << QString::number((*m)["Z"]->effective_mass) << "\n";
+  dbg << "Setpoint: X = "
+      << QString::number((*m)["X"]->setpoint)
+      << ", Y = " << QString::number((*m)["Y"]->setpoint)
+      << ", Z = " << QString::number((*m)["Z"]->setpoint) << "\n";
+  dbg << "Position: X = "
+      << QString::number((*m)["X"]->position())
+      << ", Y = " << QString::number((*m)["Y"]->position())
+      << ", Z = " << QString::number((*m)["Z"]->position()) << "\n";
   return dbg;
 }
 
@@ -95,4 +103,8 @@ double Machine::link_axes(QList<char const *> names) {
     _axes[axis]->effective_mass = mass;
   }
   return mass;
+}
+
+void Machine::describe() {
+  qDebug() << "Machine:\n" << this;
 }

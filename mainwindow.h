@@ -32,6 +32,7 @@ private:
   void dragLeaveEvent(QDragLeaveEvent *event);
   void syncData();
   void toggleFormConections(enum OnOff);
+  void setupMachineAfterNewINI();
 
   // Slots
 private slots:
@@ -40,5 +41,6 @@ private slots:
   void on_startButtonClicked();
   void on_formDataChanged();
   void on_outOfLimits(QString const &name);
+  void on_pushButton_clicked();
 };
 #endif // MAINWINDOW_H
