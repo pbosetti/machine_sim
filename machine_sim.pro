@@ -17,6 +17,7 @@ SOURCES += \
 
 HEADERS += \
     axis.h \
+    doubleclickslider.h \
     machine.h \
     mainwindow.h \
     qcustomplot.h \

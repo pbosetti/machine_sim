@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "machine.h"
 #include "ui_mainwindow.h"
+#include "doubleclickslider.h"
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
@@ -10,8 +11,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <stdio.h>
 
 #define SETPOINT_SLIDER_MAX 100.0f
+#define BUFLEN 1024
 
 //   _     _  __                      _
 //  | |   (_)/ _| ___  ___ _   _  ___| | ___
@@ -52,6 +55,10 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->connectButton, SIGNAL(clicked(bool)), this,
           SLOT(on_connectButtonClicked()));
+
+  connect(ui->setPointXSlider, &DoubleClickSlider::sliderHandleDoubleClicked, this, [=]() {
+    ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  });
 
   // Enable signals from GUI form to machine
   toggleFormConections(On);
@@ -108,9 +115,9 @@ MainWindow::MainWindow(QWidget *parent)
   ui->timePlot->axisRect()->setupFullAxesBox();
   ui->timePlot->yAxis->setRange(0, _machine.maxLength());
   ui->timePlot->setInteraction(QCP::iRangeDrag, true);
-  ui->timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
+  ui->timePlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
   ui->timePlot->setInteraction(QCP::iRangeZoom, true);
-  ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
+  ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
   ui->timePlot->xAxis->setLabel(QString("Elapsed time"));
   ui->timePlot->yAxis->setLabel(QString("Axis Position (m)"));
 
@@ -132,14 +139,17 @@ MainWindow::MainWindow(QWidget *parent)
   ui->xYPlot->yAxis->setLabel(QString("Y (m)"));
 
   // Timed action for reading data from axes
-  QTimer *timerPlot = new QTimer(this);
-  connect(timerPlot, &QTimer::timeout, this, [this]() {
+  QTimer *plotTimer = new QTimer(this);
+  connect(plotTimer, &QTimer::timeout, this, [this]() {
     if (!_running)
       return;
     double x = _machine[AxisTag::X]->position();
     double y = _machine[AxisTag::Y]->position();
     double z = _machine[AxisTag::Z]->position();
     double t = _machine.lastTime() / 1.0E9;
+    ui->xPositionText->display(x * 1000.0);
+    ui->yPositionText->display(y * 1000.0);
+    ui->zPositionText->display(z * 1000.0);
     ui->xPositionBar->setValue(x * 1000.0);
     ui->yPositionBar->setValue(y * 1000.0);
     ui->zPositionBar->setValue(z * 1000.0);
@@ -151,7 +161,7 @@ MainWindow::MainWindow(QWidget *parent)
     _xyCurvePosition->addData(x, y);
     ui->xYPlot->replot();
   });
-  timerPlot->start(20);
+  plotTimer->start(20);
 
   connect(_bangBangTimer, &QTimer::timeout, this, [this]() {
     static int level = +1;
@@ -173,6 +183,17 @@ MainWindow::MainWindow(QWidget *parent)
     level *= -1;
   });
   _bangBangTimer->start(ui->bangBangTime->value()*1000);
+
+  connect(_publishTimer, &QTimer::timeout, this, [this]() {
+    static char buffer[BUFLEN];
+    if (_rapid) {
+      snprintf(buffer, BUFLEN, "%f", _machine.error());
+      _client->publish(_errorTopic, QByteArray(buffer, strlen(buffer)));
+      snprintf(buffer, BUFLEN, "%f,%f,%f", _machine[AxisTag::X]->position(), _machine[AxisTag::Y]->position(), _machine[AxisTag::Z]->position());
+      _client->publish(_positionTopic, QByteArray(buffer, strlen(buffer)));
+    }
+  });
+
 }
 
 MainWindow::~MainWindow() {
@@ -193,6 +214,11 @@ void MainWindow::on_machineDataChanged() {
   ui->brokerPortField->setValue(_machine.brokerPort());
   ui->pubTopicField->setText(*_machine.pubTopic());
   ui->subTopicField->setText(*_machine.subTopic());
+  QString publishBasePath = *_machine.pubTopic();
+  publishBasePath.removeLast();
+  _errorTopic = publishBasePath + "error";
+  _positionTopic = publishBasePath + "position";
+  qDebug() << "publish to " << _errorTopic << "and" << _positionTopic;
   ui->timePlot->yAxis->setRange(0, _machine.maxLength());
   ui->timePlot->replot();
   syncData();
@@ -273,6 +299,7 @@ void MainWindow::setupMachineAfterNewINI() {
   ui->setPointZSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
   ui->startButton->setEnabled(true);
   ui->startButton->setToolTip("Start simulation");
+  ui->connectButton->setEnabled(true);
 }
 
 //   _____                 _
@@ -380,8 +407,11 @@ void MainWindow::on_connectButtonClicked() {
     _client->setHostname(ui->brokerAddressField->text());
     _client->setPort(ui->brokerPortField->value());
     _client->connectToHost();
+    _publishTimer->setInterval(_machine.tq() * 1000);
+    _publishTimer->start();
   } else {
     _client->disconnectFromHost();
+    _publishTimer->stop();
   }
   ui->brokerAddressField->setEnabled(!disconnected);
   ui->brokerPortField->setEnabled(!disconnected);
@@ -394,10 +424,12 @@ void MainWindow::on_connectButtonClicked() {
 void MainWindow::on_brokerConnected() {
   auto subscription = _client->subscribe(ui->subTopicField->text());
   if (!subscription) {
-    QMessageBox::critical(this, QLatin1String("Error"), QLatin1String("Could not subscribe. Is there a valid connection?"));
+    QMessageBox::critical(this, "Error",
+                          "Could not subscribe. Is there a valid connection?");
     return;
   } else {
-    statusBar()->showMessage(QString("Subscribed to topic ") + ui->subTopicField->text(), 2000);
+    statusBar()->showMessage(
+        QString("Subscribed to topic ") + ui->subTopicField->text(), 2000);
   }
 }
 
@@ -408,15 +440,17 @@ void MainWindow::on_brokerDisconnected() {
   statusBar()->showMessage(QString("Unexpected disconnection"), 20000);
 }
 
-void MainWindow::on_mqttMessage(const QByteArray &message, const QMqttTopicName &topic) {
+void MainWindow::on_mqttMessage(const QByteArray &message,
+                                const QMqttTopicName &topic) {
   if (topic.name().endsWith(QString("setpoint"))) {
     double t = _machine.lastTime() / 1.0E9;
     QJsonDocument doc = QJsonDocument::fromJson(message);
     QJsonObject obj = doc.object();
-    double x = obj["x"].toDouble();
-    double y = obj["y"].toDouble();
-    double z = obj["z"].toDouble();
+    double x = obj["x"].toDouble() / 1000.0;
+    double y = obj["y"].toDouble() / 1000.0;
+    double z = obj["z"].toDouble() / 1000.0;
     int rapid = obj["rapid"].toInt();
+    _rapid = (1 == rapid);
     _machine[AxisTag::X]->setpoint = x;
     _machine[AxisTag::Y]->setpoint = y;
     _machine[AxisTag::Z]->setpoint = z;
@@ -424,7 +458,6 @@ void MainWindow::on_mqttMessage(const QByteArray &message, const QMqttTopicName 
     ui->timePlot->graph(1)->addData(t, y);
     ui->timePlot->graph(2)->addData(t, z);
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
-    qDebug() << "Rapid: " << rapid;
     (rapid ? _xyCurveRapid : _xyCurveInterp)->addData(x, y);
   } else if (topic.name().endsWith(QString("position"))) {
 

@@ -29,10 +29,15 @@ private:
   Machine _machine;
   bool _running = false;
   QTimer *_bangBangTimer = new QTimer(this);
+  QTimer *_publishTimer = new QTimer(this);
   QCPCurve *_xyCurveRapid;
   QCPCurve *_xyCurveInterp;
   QCPCurve *_xyCurvePosition;
   QMqttClient *_client;
+  QString *_publishBasePath = new QString();
+  QMqttTopicName _errorTopic;
+  QMqttTopicName _positionTopic;
+  bool _rapid = false;
 
 
   // Events

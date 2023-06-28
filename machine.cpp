@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QList>
 #include <algorithm>
+#include <math.h>
 
 
 QDebug operator<<(QDebug dbg, Machine *m) {
@@ -33,13 +34,14 @@ QDebug operator<<(QDebug dbg, Machine *m) {
 //  | |   | | |_ / _ \/ __| | | |/ __| |/ _ \
 //  | |___| |  _|  __/ (__| |_| | (__| |  __/
 //  |_____|_|_|  \___|\___|\__, |\___|_|\___|
-//                         |___/             
+//                         |___/
 
 Machine::Machine(QObject *parent)
     : QObject(parent), _brokerAddress(QString("localhost")), _brokerPort(1883),
       _pubTopic(QString("#")), _subTopic(QString("#")) {
   _axesTags = QList<AxisTag>({AxisTag::X, AxisTag::Y, AxisTag::Z});
-  _axesNames = QHash<AxisTag, char const *>({{AxisTag::X, "X"}, {AxisTag::Y, "Y"}, {AxisTag::Z, "Z"}});
+  _axesNames = QHash<AxisTag, char const *>(
+      {{AxisTag::X, "X"}, {AxisTag::Y, "Y"}, {AxisTag::Z, "Z"}});
   timer = new QElapsedTimer();
   _axes[AxisTag::X] = new Axis(this, "X");
   _axes[AxisTag::Y] = new Axis(this, "Y");
@@ -61,6 +63,7 @@ void Machine::loadIniFile(QString &path) {
   _brokerPort = config["MQTT"]["broker_port"].value_or(1883);
   _subTopic = config["MQTT"]["pub_topic"].value_or("c-cnc/#");
   _pubTopic = config["MQTT"]["sub_topic"].value_or("c-cnc/#");
+  _tq = config["C-CNC"]["tq"].value_or(0.005);
 
   for (AxisTag axis : _axesTags) {
     _axes[axis]->length = config[_axesNames[axis]]["length"].value_or(1.0);
@@ -128,4 +131,11 @@ double Machine::maxLength() {
              [](Axis *a, Axis *b) { return a->length < b->length; })
       .value()
       ->length;
+}
+
+double Machine::error() {
+  return sqrt(
+      pow(_axes[AxisTag::X]->position() - _axes[AxisTag::X]->setpoint, 2) +
+      pow(_axes[AxisTag::Y]->position() - _axes[AxisTag::Y]->setpoint, 2) +
+      pow(_axes[AxisTag::Z]->position() - _axes[AxisTag::Z]->setpoint, 2));
 }

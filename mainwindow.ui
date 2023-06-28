@@ -18,7 +18,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QGroupBox" name="groupBox_5">
+       <widget class="QGroupBox" name="MqttGroup">
         <property name="title">
          <string>MQTT Broker</string>
         </property>
@@ -43,10 +43,18 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="brokerAddressField"/>
+            <widget class="QLineEdit" name="brokerAddressField">
+             <property name="text">
+              <string>localhost</string>
+             </property>
+            </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="subTopicField"/>
+            <widget class="QLineEdit" name="subTopicField">
+             <property name="text">
+              <string>c-cnc/setpoint</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -80,15 +88,25 @@
              <property name="maximum">
               <number>4096</number>
              </property>
+             <property name="value">
+              <number>1883</number>
+             </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QLineEdit" name="pubTopicField"/>
+            <widget class="QLineEdit" name="pubTopicField">
+             <property name="text">
+              <string>c-cnc/status/#</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
          <item>
           <widget class="QPushButton" name="connectButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string>Connect</string>
            </property>
@@ -288,12 +306,21 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QSlider" name="setPointXSlider">
+            <widget class="DoubleClickSlider" name="setPointXSlider">
              <property name="maximum">
               <number>100</number>
              </property>
+             <property name="sliderPosition">
+              <number>0</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -304,17 +331,26 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLCDNumber" name="lcdNumber">
-             <property name="segmentStyle">
-              <enum>QLCDNumber::Flat</enum>
-             </property>
-            </widget>
-           </item>
            <item row="4" column="1">
             <widget class="QProgressBar" name="xPositionBar">
              <property name="value">
               <number>24</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLCDNumber" name="xPositionText">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="smallDecimalPoint">
+              <bool>true</bool>
+             </property>
+             <property name="digitCount">
+              <number>6</number>
+             </property>
+             <property name="segmentStyle">
+              <enum>QLCDNumber::Flat</enum>
              </property>
             </widget>
            </item>
@@ -398,12 +434,15 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QSlider" name="setPointYSlider">
+            <widget class="DoubleClickSlider" name="setPointYSlider">
              <property name="maximum">
               <number>100</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksAbove</enum>
              </property>
             </widget>
            </item>
@@ -415,7 +454,16 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLCDNumber" name="lcdNumber_2">
+            <widget class="QLCDNumber" name="yPositionText">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="smallDecimalPoint">
+              <bool>true</bool>
+             </property>
+             <property name="digitCount">
+              <number>6</number>
+             </property>
              <property name="segmentStyle">
               <enum>QLCDNumber::Flat</enum>
              </property>
@@ -508,12 +556,15 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QSlider" name="setPointZSlider">
+            <widget class="DoubleClickSlider" name="setPointZSlider">
              <property name="maximum">
               <number>100</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksAbove</enum>
              </property>
             </widget>
            </item>
@@ -525,7 +576,16 @@
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLCDNumber" name="lcdNumber_3">
+            <widget class="QLCDNumber" name="zPositionText">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="smallDecimalPoint">
+              <bool>true</bool>
+             </property>
+             <property name="digitCount">
+              <number>6</number>
+             </property>
              <property name="segmentStyle">
               <enum>QLCDNumber::Flat</enum>
              </property>
@@ -618,54 +678,27 @@
    <header>qcustomplot.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>DoubleClickSlider</class>
+   <extends>QSlider</extends>
+   <header>doubleclickslider.h</header>
+  </customwidget>
  </customwidgets>
  <resources/>
  <connections>
   <connection>
-   <sender>xPositionBar</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>lcdNumber</receiver>
-   <slot>display(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>146</x>
-     <y>297</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>68</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>yPositionBar</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>lcdNumber_2</receiver>
-   <slot>display(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>415</x>
-     <y>301</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>364</x>
-     <y>301</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>zPositionBar</sender>
    <signal>valueChanged(int)</signal>
-   <receiver>lcdNumber_3</receiver>
+   <receiver>zPositionText</receiver>
    <slot>display(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>705</x>
-     <y>298</y>
+     <x>842</x>
+     <y>333</y>
     </hint>
     <hint type="destinationlabel">
-     <x>650</x>
-     <y>301</y>
+     <x>667</x>
+     <y>337</y>
     </hint>
    </hints>
   </connection>

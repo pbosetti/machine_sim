@@ -29,6 +29,7 @@ public:
   void describe();
   quint64 lastTime();
   double maxLength();
+  double error();
 
   // Getters
   QString *brokerAddress() { return &_brokerAddress; }
@@ -45,6 +46,7 @@ public:
   QList<Axis *> axes() { return _axes.values(); }
   QList<AxisTag> *axesTags() { return &_axesTags; }
   QHash<AxisTag, char const *> *axesNames() { return &_axesNames; }
+  double tq() { return _tq; }
 
   // Attributes
 public:
@@ -57,6 +59,7 @@ private:
   QList<AxisTag> _axesTags;
   QHash<AxisTag, char const *> _axesNames;
   QHash<AxisTag, Axis *> _axes;
+  double _tq;
 
   // Signals
 signals:
