@@ -58,6 +58,7 @@ jobs:
         working-directory: ${{ runner.temp }}/qtmqtt
         run: |
              cmake --build build -j4
+             dir build/bin
              cmake --install build
 
       - name: (4) Download JOM
