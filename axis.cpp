@@ -66,6 +66,10 @@ void Axis::reset() {
   _position = length / 2.0;
   _speed = 0;
   _torque = 0;
+  _time = 0;
+  _previousTime = 0;
+  _errI = _errD = 0;
+  _prevError = 0;
 }
 
 

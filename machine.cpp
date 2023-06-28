@@ -121,3 +121,11 @@ quint64 Machine::lastTime() {
   QList<quint64>::iterator max = std::max_element(times.begin(), times.end());
   return *max;
 }
+
+double Machine::maxLength() {
+  return std::max_element(
+             _axes.begin(), _axes.end(),
+             [](Axis *a, Axis *b) { return a->length < b->length; })
+      .value()
+      ->length;
+}

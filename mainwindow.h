@@ -28,6 +28,9 @@ private:
   Machine _machine;
   bool _running = false;
   QTimer *_bangBangTimer = new QTimer(this);
+  QCPCurve *xyCurveRapid;
+  QCPCurve *xyCurveInterp;
+  QCPCurve *xyCurvePosition;
 
 
   // Events
@@ -45,7 +48,6 @@ private slots:
   void on_startButtonClicked();
   void on_formDataChanged();
   void on_outOfLimits(QString const &name);
-  void on_pushButton_clicked();
-  void on_bangBangTime_valueChanged(double arg1);
+  void on_bangBangTimeChanged(double arg1);
 };
 #endif // MAINWINDOW_H

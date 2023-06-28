@@ -37,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent)
   connect(ui->startButton, SIGNAL(clicked(bool)), this,
           SLOT(on_startButtonClicked()));
 
+  connect(ui->bangBangTime, SIGNAL(valueChanged(double)), this,
+          SLOT(on_bangBangTimeChanged(double)));
+
   // Enable signals from GUI form to machine
   toggleFormConections(On);
 
@@ -49,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setPointZSlider->setMaximum(SETPOINT_SLIDER_MAX);
 
   // Setup timePlot
+  ui->timePlot->setLocale(QLocale("EN_en"));
   QPen pen;
   pen.setColor(QColor(200, 0, 0));
   pen.setStyle(Qt::CustomDashLine);
@@ -89,13 +93,30 @@ MainWindow::MainWindow(QWidget *parent)
   timeTicker->setTimeFormat("%h:%m:%s");
   ui->timePlot->xAxis->setTicker(timeTicker);
   ui->timePlot->axisRect()->setupFullAxesBox();
-  ui->timePlot->yAxis->setRange(0, 1);
+  ui->timePlot->yAxis->setRange(0, _machine.maxLength());
   ui->timePlot->setInteraction(QCP::iRangeDrag, true);
   ui->timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
   ui->timePlot->setInteraction(QCP::iRangeZoom, true);
   ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
   ui->timePlot->xAxis->setLabel(QString("Elapsed time"));
-  ui->timePlot->yAxis->setLabel(QString("Axis Position (mm)"));
+  ui->timePlot->yAxis->setLabel(QString("Axis Position (m)"));
+
+  // Setup XY plot
+  xyCurveRapid = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  xyCurveInterp = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  xyCurveRapid->setPen(QPen(QColor(200, 0, 0)));
+  xyCurveInterp->setPen(QPen(QColor(0, 0, 200)));
+  xyCurvePosition = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  xyCurvePosition->setPen(QPen(QColor(0, 200, 0)));
+  ui->xYPlot->setLocale(QLocale("EN_en"));
+  ui->xYPlot->axisRect()->setupFullAxesBox();
+  ui->xYPlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
+  ui->xYPlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+  ui->xYPlot->setInteraction(QCP::iRangeDrag, true);
+  ui->xYPlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+  ui->xYPlot->setInteraction(QCP::iRangeZoom, true);
+  ui->xYPlot->xAxis->setLabel(QString("X (mm)"));
+  ui->xYPlot->yAxis->setLabel(QString("Y (mm)"));
 
   // Timed action for reading data from axes
   QTimer *timerPlot = new QTimer(this);
@@ -114,6 +135,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timePlot->graph(5)->addData(t, z);
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
     ui->timePlot->replot();
+    xyCurvePosition->addData(x, y);
+    ui->xYPlot->replot();
   });
   timerPlot->start(20);
 
@@ -154,6 +177,8 @@ void MainWindow::on_machineDataChanged() {
   ui->brokerPortField->setValue(_machine.brokerPort());
   ui->pubTopicField->setText(*_machine.pubTopic());
   ui->subTopicField->setText(*_machine.subTopic());
+  ui->timePlot->yAxis->setRange(0, _machine.maxLength());
+  ui->timePlot->replot();
   syncData();
 }
 
@@ -317,6 +342,9 @@ void MainWindow::on_startButtonClicked() {
   if (!_running) {
     for (int i = 0; i < ui->timePlot->graphCount(); i++) {
       ui->timePlot->graph(i)->data().data()->clear();
+      xyCurvePosition->data().data()->clear();
+      xyCurveInterp->data().data()->clear();
+      xyCurveRapid->data().data()->clear();
     }
     _machine.start();
     _running = true;
@@ -340,11 +368,7 @@ void MainWindow::on_outOfLimits(QString const &name) {
       "Limits reached on axis " + name + ", stopping execution", 10000);
 }
 
-void MainWindow::on_pushButton_clicked() {
-  _machine.describe();
-  //  ui->xPositionBar->setValue()
-}
 
-void MainWindow::on_bangBangTime_valueChanged(double arg1) {
+void MainWindow::on_bangBangTimeChanged(double arg1) {
   _bangBangTimer->setInterval(arg1 * 1000);
 }

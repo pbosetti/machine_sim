@@ -1,6 +1,7 @@
 #ifndef AXIS_H
 #define AXIS_H
 
+#include "QtCore/qdebug.h"
 #include <QObject>
 #include <QThread>
 #include <unistd.h>

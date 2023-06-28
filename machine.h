@@ -28,6 +28,7 @@ public:
   double link_axes(QList<AxisTag>);
   void describe();
   quint64 lastTime();
+  double maxLength();
 
   // Getters
   QString *brokerAddress() { return &_brokerAddress; }
