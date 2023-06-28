@@ -45,6 +45,15 @@ jobs:
           cache:        true
           setup-python: false
 
+      - name: (3.5) install QTMQTT
+        working-directory: ${{ runner.temp }}
+        run: |
+             git clone https://github.com/qt/qtmqtt.git
+             git checkout v6.5.1
+             cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
+             cmake --build build -j4
+             cmake --install build
+
       - name: (4) Download JOM
         uses: suisei-cn/actions-download-file@v1
         with:
