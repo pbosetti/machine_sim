@@ -41,7 +41,7 @@ jobs:
           target:       desktop
           arch:         win64_msvc2019_64
           dir:          ${{ runner.temp }}
-          modules:      qtcharts # mqtt printsupport
+          modules:      qtcharts qtwebsockets # mqtt printsupport
           cache:        true
           setup-python: false
 
@@ -53,6 +53,7 @@ jobs:
              git checkout v${{ env.QT_VERSION }}
              cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
              cmake --build build -j4
+             ls "D:/a/_temp/qtmqtt/build/bin"
              cmake --install build
 
       - name: (4) Download JOM
