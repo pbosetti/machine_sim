@@ -51,7 +51,7 @@ jobs:
              git clone https://github.com/qt/qtmqtt.git
              cd qtmqtt
              git checkout v${{ env.QT_VERSION }}
-             cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
+             cmake -Bbuild -DCMAKE_BUILD_TYPE=Debug
              cmake --build build -j4
              ls "D:/a/_temp/qtmqtt/build/bin"
              cmake --install build
