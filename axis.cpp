@@ -32,24 +32,54 @@ Axis::~Axis() {
 //        |_|                                         
 
 void Axis::run() {
+  double dt = 0;
+  double m = effective_mass;
+  double f = 0;
+  quint64 now = _timer->nsecsElapsed();
+  _previousTime = now;
   qDebug() << "Starting thread for axis " << objectName()
-           << " at time " + QString::number(_timer->nsecsElapsed());
+           << " at time " + QString::number(now);
   while (!isInterruptionRequested()) {
-    count += setpoint * length * 1000;
-    if (count > length * 1000 || count < 0) {
+    // timings
+    now = _timer->nsecsElapsed();
+    dt = (now - _previousTime) / 1.0E9;
+    _previousTime = now;
+    // PID
+    pid(dt);
+    // fwd dynamics (Euler's scheme)
+    f = (M_PI * _torque / pitch) - (GRAVITY * mass * pitch);
+    _position += _speed * dt;
+    _speed = _speed * (1 - friction / m * dt) + f * dt / m;
+    // out-of-range conditions
+    if (_position > length || _position < 0) {
       emit outOfLimits(objectName());
       break;
     }
-    sleep(1);
+    usleep(integration_dt);
   }
   qDebug() << "Stopped thread for axis " << objectName()
            << " at time " + QString::number(_timer->nsecsElapsed());
 }
 
 void Axis::reset() {
-  count = 0;
   setpoint = length / 2.0;
   _position = length / 2.0;
   _speed = 0;
   _torque = 0;
+}
+
+
+void Axis::pid(double dt) {
+  double out, err;
+  err = setpoint - _position;
+  if (i)
+    _errI += (err + _prevError) * dt / 2.0;
+  if (d && dt > 0)
+    _errD = (err - _prevError) / dt;
+  _prevError = err;
+  out = p * err + i * _errI + d * _errD;
+  if (out > 0)
+    _torque = fmin(out, max_torque);
+  else
+    _torque = fmax(out, -max_torque);
 }

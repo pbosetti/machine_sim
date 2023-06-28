@@ -5,6 +5,8 @@
 #include <QThread>
 #include <unistd.h>
 
+#define GRAVITY 9.81f
+
 class Axis : public QThread {
   Q_OBJECT
 public:
@@ -29,11 +31,11 @@ public:
   double gravity = 0;
   useconds_t integration_dt = 5;
   double p = 0, i = 0, d = 0;
-  double count = 0;
   double setpoint = 0.0;
 
   // Getters
   double position() { return _position; }
+  quint64 previousTime() { return _previousTime; }
 
   // Attributes
 private:
@@ -42,6 +44,13 @@ private:
   double _time = 0;
   double _torque = 0;
   QElapsedTimer *_timer;
+  quint64 _previousTime = 0;
+  double _errI = 0, _errD = 0;
+  double _prevError = 0;
+
+  // Utilities
+private:
+  void pid(double dt);
 };
 
 #endif // AXIS_H

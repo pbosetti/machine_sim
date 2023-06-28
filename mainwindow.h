@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "machine.h"
+#include "qcustomplot.h"
 #include <QMainWindow>
 
 enum OnOff { On, Off };

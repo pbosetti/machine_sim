@@ -21,6 +21,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
+  setLocale(QLocale("EN_en"));
   setAcceptDrops(true);
 
   // Out of limits signal
@@ -51,18 +52,74 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setPointYSlider->setMaximum(SETPOINT_SLIDER_MAX);
   ui->setPointZSlider->setMaximum(SETPOINT_SLIDER_MAX);
 
+         // Setup timePlot
+  QPen pen;
+  pen.setColor(QColor(200, 0, 0));
+  pen.setStyle(Qt::CustomDashLine);
+  QList<qreal> dashes;
+  dashes << 20 << 2;
+  pen.setDashPattern(dashes);
+  // X
+  ui->timePlot->addGraph();
+  ui->timePlot->graph(0)->setPen(pen);
+
+  // Y
+  pen.setColor(QColor(0, 200, 0));
+  ui->timePlot->addGraph();
+  ui->timePlot->graph(1)->setPen(pen);
+
+  // Z
+  pen.setColor(QColor(0, 0, 200));
+  ui->timePlot->addGraph();
+  ui->timePlot->graph(2)->setPen(pen);
+
+  pen.setStyle(Qt::SolidLine);
+  // X
+  pen.setColor(QColor(255, 0, 0));
+  ui->timePlot->addGraph();
+  ui->timePlot->graph(3)->setPen(pen);
+
+  // Y
+  pen.setColor(QColor(0, 255, 0));
+  ui->timePlot->addGraph();
+  ui->timePlot->graph(4)->setPen(pen);
+
+  // Z
+  pen.setColor(QColor(0, 0, 255));
+  ui->timePlot->addGraph();
+  ui->timePlot->graph(5)->setPen(pen);
+
+  QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
+  timeTicker->setTimeFormat("%h:%m:%s");
+  ui->timePlot->xAxis->setTicker(timeTicker);
+  ui->timePlot->axisRect()->setupFullAxesBox();
+  ui->timePlot->yAxis->setRange(0, 1);
+  ui->timePlot->setInteraction(QCP::iRangeDrag, true);
+  ui->timePlot->axisRect()->setRangeDrag(Qt::Horizontal);
+  ui->timePlot->setInteraction(QCP::iRangeZoom, true);
+  ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
+  ui->timePlot->xAxis->setLabel(QString("Elapsed time"));
+  ui->timePlot->yAxis->setLabel(QString("Axis Position (mm)"));
+
   // Timed action for reading data from axes
   QTimer *timer = new QTimer(this);
   connect(timer, &QTimer::timeout, this, [this]() {
-    int x = _machine[AxisTag::X]->count;
-    int y = _machine[AxisTag::Y]->count;
-    int z = _machine[AxisTag::Z]->count;
-
-    ui->xPositionBar->setValue(x);
-    ui->yPositionBar->setValue(y);
-    ui->zPositionBar->setValue(z);
+    if (!_running) return;
+    double x = _machine[AxisTag::X]->position();
+    double y = _machine[AxisTag::Y]->position();
+    double z = _machine[AxisTag::Z]->position();
+    double t = _machine.lastTime()/1.0E9;
+    ui->xPositionBar->setValue(x * 1000.0);
+    ui->yPositionBar->setValue(y * 1000.0);
+    ui->zPositionBar->setValue(z * 1000.0);
+    qDebug() << "t: " + QString::number(t) + ", X: " + QString::number(x);
+    ui->timePlot->graph(3)->addData(t, x);
+    ui->timePlot->graph(4)->addData(t, y);
+    ui->timePlot->graph(5)->addData(t, z);
+    ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
+    ui->timePlot->replot();
   });
-  timer->start(500);
+  timer->start(20);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -247,6 +304,9 @@ void MainWindow::on_startButtonClicked() {
     _machine.reset();
     _running = false;
     ui->startButton->setText("Start");
+    for (int i = 0; i < ui->timePlot->graphCount(); i++) {
+      ui->timePlot->graph(i)->data().clear();
+    }
   }
 }
 
@@ -264,5 +324,6 @@ void MainWindow::on_outOfLimits(QString const &name) {
 void MainWindow::on_pushButton_clicked()
 {
   _machine.describe();
+//  ui->xPositionBar->setValue()
 }
 

@@ -27,6 +27,7 @@ public:
   void reset();
   double link_axes(QList<AxisTag>);
   void describe();
+  quint64 lastTime();
 
   // Getters
   QString *brokerAddress() { return &_brokerAddress; }

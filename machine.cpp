@@ -111,3 +111,13 @@ double Machine::link_axes(QList<AxisTag> names) {
 void Machine::describe() {
   qDebug().nospace() << "Machine:\n" << this;
 }
+
+quint64 Machine::lastTime() {
+  QList<quint64> times = {
+    _axes[AxisTag::X]->previousTime(),
+    _axes[AxisTag::Y]->previousTime(),
+    _axes[AxisTag::Z]->previousTime(),
+  };
+  QList<quint64>::iterator max = std::max_element(times.begin(), times.end());
+  return *max;
+}
