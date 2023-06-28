@@ -45,14 +45,18 @@ jobs:
           cache:        true
           setup-python: false
 
-      - name: (3.5) install QTMQTT
+      - name: (3.5) Build QTMQTT
         working-directory: ${{ runner.temp }}
         run: |
              git clone https://github.com/qt/qtmqtt.git
              cd qtmqtt
              git checkout v${{ env.QT_VERSION }}
-             cmake -Bbuild -DCMAKE_BUILD_TYPE=Debug
+             cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
              cmake --build build -j4
+             
+      - name: (3.6) Install QTMQTT
+        working-directory: ${{ runner.temp }}
+        run: |
              ls "D:/a/_temp/qtmqtt/build/bin"
              cmake --install build
 
