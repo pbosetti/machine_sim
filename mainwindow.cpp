@@ -102,12 +102,12 @@ MainWindow::MainWindow(QWidget *parent)
   ui->timePlot->yAxis->setLabel(QString("Axis Position (m)"));
 
   // Setup XY plot
-  xyCurveRapid = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
-  xyCurveInterp = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
-  xyCurveRapid->setPen(QPen(QColor(200, 0, 0)));
-  xyCurveInterp->setPen(QPen(QColor(0, 0, 200)));
-  xyCurvePosition = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
-  xyCurvePosition->setPen(QPen(QColor(0, 200, 0)));
+  _xyCurveRapid = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  _xyCurveInterp = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  _xyCurveRapid->setPen(QPen(QColor(200, 0, 0)));
+  _xyCurveInterp->setPen(QPen(QColor(0, 0, 200)));
+  _xyCurvePosition = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  _xyCurvePosition->setPen(QPen(QColor(0, 200, 0)));
   ui->xYPlot->setLocale(QLocale("EN_en"));
   ui->xYPlot->axisRect()->setupFullAxesBox();
   ui->xYPlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
@@ -135,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timePlot->graph(5)->addData(t, z);
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
     ui->timePlot->replot();
-    xyCurvePosition->addData(x, y);
+    _xyCurvePosition->addData(x, y);
     ui->xYPlot->replot();
   });
   timerPlot->start(20);
@@ -342,9 +342,9 @@ void MainWindow::on_startButtonClicked() {
   if (!_running) {
     for (int i = 0; i < ui->timePlot->graphCount(); i++) {
       ui->timePlot->graph(i)->data().data()->clear();
-      xyCurvePosition->data().data()->clear();
-      xyCurveInterp->data().data()->clear();
-      xyCurveRapid->data().data()->clear();
+      _xyCurvePosition->data().data()->clear();
+      _xyCurveInterp->data().data()->clear();
+      _xyCurveRapid->data().data()->clear();
     }
     _machine.start();
     _running = true;

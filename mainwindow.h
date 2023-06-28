@@ -28,9 +28,9 @@ private:
   Machine _machine;
   bool _running = false;
   QTimer *_bangBangTimer = new QTimer(this);
-  QCPCurve *xyCurveRapid;
-  QCPCurve *xyCurveInterp;
-  QCPCurve *xyCurvePosition;
+  QCPCurve *_xyCurveRapid;
+  QCPCurve *_xyCurveInterp;
+  QCPCurve *_xyCurvePosition;
 
 
   // Events
