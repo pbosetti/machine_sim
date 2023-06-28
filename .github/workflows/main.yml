@@ -52,10 +52,15 @@ jobs:
              cd qtmqtt
              git checkout v${{ env.QT_VERSION }}
              cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
+             cmake -LAH build
+
+      - name: Build QTMQTT
+        working-directory: ${{ runner.temp }}/qtmqtt
+        run: |
              cmake --build build -j4
              
       - name: (3.6) Install QTMQTT
-        working-directory: ${{ runner.temp }}
+        working-directory: ${{ runner.temp }}/qtmqtt
         run: |
              ls "D:/a/_temp/qtmqtt/build/bin"
              cmake --install build
