@@ -36,7 +36,7 @@ jobs:
         run: |
           git fetch --all --tags -f
       - name: (3) Install Qt
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
           version:      ${{ env.QT_VERSION }}
           host:         windows
@@ -44,6 +44,7 @@ jobs:
           arch:         win64_msvc2019_64
           dir:          ${{ runner.temp }}
           modules:      mqtt printsupport
+          cache:        true
           setup-python: false
 
       - name: (4) Download JOM
