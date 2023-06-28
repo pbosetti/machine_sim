@@ -18,7 +18,7 @@ defaults:
 
 env:
   SOURCE_DIR:   ${{ github.workspace }}
-  QT_VERSION:   6.4.3
+  QT_VERSION:   6.6.0
   ARTIFACT:     machine_sim.zip
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
           target:       desktop
           arch:         win64_msvc2019_64
           dir:          ${{ runner.temp }}
-          modules:      charts # mqtt printsupport
+          modules:      qtcharts # mqtt printsupport
           cache:        true
           setup-python: false
 
