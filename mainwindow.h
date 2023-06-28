@@ -4,6 +4,7 @@
 #include "machine.h"
 #include "qcustomplot.h"
 #include <QMainWindow>
+#include <QTimer>
 
 enum OnOff { On, Off };
 
@@ -26,6 +27,8 @@ private:
   Ui::MainWindow *ui;
   Machine _machine;
   bool _running = false;
+  QTimer *_bangBangTimer = new QTimer(this);
+
 
   // Events
   void dragEnterEvent(QDragEnterEvent *e);
@@ -43,5 +46,6 @@ private slots:
   void on_formDataChanged();
   void on_outOfLimits(QString const &name);
   void on_pushButton_clicked();
+  void on_bangBangTime_valueChanged(double arg1);
 };
 #endif // MAINWINDOW_H

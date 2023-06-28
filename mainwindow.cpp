@@ -1,22 +1,21 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "machine.h"
+#include "ui_mainwindow.h"
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QMimeData>
-#include <QTimer>
 
 #define SETPOINT_SLIDER_MAX 100.0f
 
-//   _     _  __                      _      
-//  | |   (_)/ _| ___  ___ _   _  ___| | ___ 
+//   _     _  __                      _
+//  | |   (_)/ _| ___  ___ _   _  ___| | ___
 //  | |   | | |_ / _ \/ __| | | |/ __| |/ _ \
 //  | |___| |  _|  __/ (__| |_| | (__| |  __/
 //  |_____|_|_|  \___|\___|\__, |\___|_|\___|
-//                         |___/             
+//                         |___/
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -27,19 +26,16 @@ MainWindow::MainWindow(QWidget *parent)
   // Out of limits signal
   for (AxisTag axis : *_machine.axesTags()) {
     connect(_machine[axis], SIGNAL(outOfLimits(QString)), this,
-             SLOT(on_outOfLimits(QString)));
+            SLOT(on_outOfLimits(QString)));
   }
-//  connect(_machine[AxisTag::Y], SIGNAL(outOfLimits(QString)), this,
-//          SLOT(on_outOfLimits(QString)));
-//  connect(_machine[AxisTag::Z], SIGNAL(outOfLimits(QString)), this,
-//          SLOT(on_outOfLimits(QString)));
 
   // when INI file loaded, update GUI
   connect(&_machine, SIGNAL(dataHasChanged()), this,
           SLOT(on_machineDataChanged()));
 
   // GUI
-  connect(ui->startButton, SIGNAL(clicked(bool)), this, SLOT(on_startButtonClicked()));
+  connect(ui->startButton, SIGNAL(clicked(bool)), this,
+          SLOT(on_startButtonClicked()));
 
   // Enable signals from GUI form to machine
   toggleFormConections(On);
@@ -52,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setPointYSlider->setMaximum(SETPOINT_SLIDER_MAX);
   ui->setPointZSlider->setMaximum(SETPOINT_SLIDER_MAX);
 
-         // Setup timePlot
+  // Setup timePlot
   QPen pen;
   pen.setColor(QColor(200, 0, 0));
   pen.setStyle(Qt::CustomDashLine);
@@ -102,34 +98,55 @@ MainWindow::MainWindow(QWidget *parent)
   ui->timePlot->yAxis->setLabel(QString("Axis Position (mm)"));
 
   // Timed action for reading data from axes
-  QTimer *timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, [this]() {
-    if (!_running) return;
+  QTimer *timerPlot = new QTimer(this);
+  connect(timerPlot, &QTimer::timeout, this, [this]() {
+    if (!_running)
+      return;
     double x = _machine[AxisTag::X]->position();
     double y = _machine[AxisTag::Y]->position();
     double z = _machine[AxisTag::Z]->position();
-    double t = _machine.lastTime()/1.0E9;
+    double t = _machine.lastTime() / 1.0E9;
     ui->xPositionBar->setValue(x * 1000.0);
     ui->yPositionBar->setValue(y * 1000.0);
     ui->zPositionBar->setValue(z * 1000.0);
-    qDebug() << "t: " + QString::number(t) + ", X: " + QString::number(x);
     ui->timePlot->graph(3)->addData(t, x);
     ui->timePlot->graph(4)->addData(t, y);
     ui->timePlot->graph(5)->addData(t, z);
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
     ui->timePlot->replot();
   });
-  timer->start(20);
+  timerPlot->start(20);
+
+  connect(_bangBangTimer, &QTimer::timeout, this, [this]() {
+    static int level = +1;
+    if (ui->bangBangX->isChecked()) {
+      _machine[AxisTag::X]->setpoint =
+          (0.5 + level * ui->bangBangLevel->value()) *
+          _machine[AxisTag::X]->length;
+    }
+    if (ui->bangBangY->isChecked()) {
+      _machine[AxisTag::Y]->setpoint =
+          (0.5 + level * ui->bangBangLevel->value()) *
+          _machine[AxisTag::Y]->length;
+    }
+    if (ui->bangBangZ->isChecked()) {
+      _machine[AxisTag::Z]->setpoint =
+          (0.5 + level * ui->bangBangLevel->value()) *
+          _machine[AxisTag::Z]->length;
+    }
+    level *= -1;
+  });
+  _bangBangTimer->start(ui->bangBangTime->value()*1000);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
-//    ___                       _   _                 
-//   / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___ 
+//    ___                       _   _
+//   / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___
 //  | | | | '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \/ __|
 //  | |_| | |_) |  __/ | | (_| | |_| | (_) | | | \__ \
 //   \___/| .__/ \___|_|  \__,_|\__|_|\___/|_| |_|___/
-//        |_|                                         
+//        |_|
 
 // Update GUI when a new INI file is loaded
 void MainWindow::on_machineDataChanged() {
@@ -145,15 +162,15 @@ void MainWindow::syncData() {
   ui->xPositionBar->setMaximum(_machine[AxisTag::X]->length * 1000);
   ui->yPositionBar->setMaximum(_machine[AxisTag::Y]->length * 1000);
   ui->zPositionBar->setMaximum(_machine[AxisTag::Z]->length * 1000);
-  
+
   ui->xpSpinBox->setValue(_machine[AxisTag::X]->p);
   ui->xiSpinBox->setValue(_machine[AxisTag::X]->i);
   ui->xdSpinBox->setValue(_machine[AxisTag::X]->d);
-  
+
   ui->ypSpinBox->setValue(_machine[AxisTag::Y]->p);
   ui->yiSpinBox->setValue(_machine[AxisTag::Y]->i);
   ui->ydSpinBox->setValue(_machine[AxisTag::Y]->d);
-  
+
   ui->zpSpinBox->setValue(_machine[AxisTag::Z]->p);
   ui->ziSpinBox->setValue(_machine[AxisTag::Z]->i);
   ui->zdSpinBox->setValue(_machine[AxisTag::Z]->d);
@@ -217,12 +234,11 @@ void MainWindow::setupMachineAfterNewINI() {
   ui->startButton->setToolTip("Start simulation");
 }
 
-//   _____                 _       
-//  | ____|_   _____ _ __ | |_ ___ 
+//   _____                 _
+//  | ____|_   _____ _ __ | |_ ___
 //  |  _| \ \ / / _ \ '_ \| __/ __|
 //  | |___ \ V /  __/ | | | |_\__ \
 //  |_____| \_/ \___|_| |_|\__|___/
-                                
 
 // Accept dragged INI file
 void MainWindow::dragEnterEvent(QDragEnterEvent *e) {
@@ -256,32 +272,36 @@ void MainWindow::dropEvent(QDropEvent *e) {
   setupMachineAfterNewINI();
 }
 
-//   ____  _       _       
-//  / ___|| | ___ | |_ ___ 
+//   ____  _       _
+//  / ___|| | ___ | |_ ___
 //  \___ \| |/ _ \| __/ __|
 //   ___) | | (_) | |_\__ \
 //  |____/|_|\___/ \__|___/
-                        
 
 // Update machine when GUI data change
 void MainWindow::on_formDataChanged() {
   _machine[AxisTag::X]->p = ui->xpSpinBox->value();
   _machine[AxisTag::X]->i = ui->xiSpinBox->value();
   _machine[AxisTag::X]->d = ui->xdSpinBox->value();
-  
+
   _machine[AxisTag::Y]->p = ui->ypSpinBox->value();
   _machine[AxisTag::Y]->i = ui->yiSpinBox->value();
   _machine[AxisTag::Y]->d = ui->ydSpinBox->value();
-  
+
   _machine[AxisTag::Z]->p = ui->zpSpinBox->value();
   _machine[AxisTag::Z]->i = ui->ziSpinBox->value();
   _machine[AxisTag::Z]->d = ui->zdSpinBox->value();
-  
-  _machine[AxisTag::X]->setpoint = ui->setPointXSlider->value() / SETPOINT_SLIDER_MAX * _machine[AxisTag::X]->length;
-  _machine[AxisTag::Y]->setpoint = ui->setPointYSlider->value() / SETPOINT_SLIDER_MAX * _machine[AxisTag::Y]->length;
-  _machine[AxisTag::Z]->setpoint = ui->setPointZSlider->value() / SETPOINT_SLIDER_MAX * _machine[AxisTag::Z]->length;
-}
 
+  _machine[AxisTag::X]->setpoint = ui->setPointXSlider->value() /
+                                   SETPOINT_SLIDER_MAX *
+                                   _machine[AxisTag::X]->length;
+  _machine[AxisTag::Y]->setpoint = ui->setPointYSlider->value() /
+                                   SETPOINT_SLIDER_MAX *
+                                   _machine[AxisTag::Y]->length;
+  _machine[AxisTag::Z]->setpoint = ui->setPointZSlider->value() /
+                                   SETPOINT_SLIDER_MAX *
+                                   _machine[AxisTag::Z]->length;
+}
 
 void MainWindow::on_action_Open_INI_file_triggered() {
   QString fileName =
@@ -295,6 +315,9 @@ void MainWindow::on_action_Open_INI_file_triggered() {
 // Start/stop simulation
 void MainWindow::on_startButtonClicked() {
   if (!_running) {
+    for (int i = 0; i < ui->timePlot->graphCount(); i++) {
+      ui->timePlot->graph(i)->data().data()->clear();
+    }
     _machine.start();
     _running = true;
     ui->startButton->setText("Stop");
@@ -304,9 +327,6 @@ void MainWindow::on_startButtonClicked() {
     _machine.reset();
     _running = false;
     ui->startButton->setText("Start");
-    for (int i = 0; i < ui->timePlot->graphCount(); i++) {
-      ui->timePlot->graph(i)->data().clear();
-    }
   }
 }
 
@@ -320,10 +340,11 @@ void MainWindow::on_outOfLimits(QString const &name) {
       "Limits reached on axis " + name + ", stopping execution", 10000);
 }
 
-
-void MainWindow::on_pushButton_clicked()
-{
+void MainWindow::on_pushButton_clicked() {
   _machine.describe();
-//  ui->xPositionBar->setValue()
+  //  ui->xPositionBar->setValue()
 }
 
+void MainWindow::on_bangBangTime_valueChanged(double arg1) {
+  _bangBangTimer->setInterval(arg1 * 1000);
+}
