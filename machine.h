@@ -42,6 +42,7 @@ public:
     }
     return _axes[name];
   };
+  QList<Axis *> axes() { return _axes.values(); }
   QList<AxisTag> *axesTags() { return &_axesTags; }
   QHash<AxisTag, char const *> *axesNames() { return &_axesNames; }
 

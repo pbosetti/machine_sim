@@ -5,6 +5,7 @@
 #include "qcustomplot.h"
 #include <QMainWindow>
 #include <QTimer>
+#include <QMqttClient>
 
 enum OnOff { On, Off };
 
@@ -31,6 +32,7 @@ private:
   QCPCurve *_xyCurveRapid;
   QCPCurve *_xyCurveInterp;
   QCPCurve *_xyCurvePosition;
+  QMqttClient *_client;
 
 
   // Events
@@ -46,8 +48,12 @@ private slots:
   void on_action_Open_INI_file_triggered();
   void on_machineDataChanged();
   void on_startButtonClicked();
+  void on_connectButtonClicked();
   void on_formDataChanged();
   void on_outOfLimits(QString const &name);
   void on_bangBangTimeChanged(double arg1);
+  void on_brokerDisconnected();
+  void on_brokerConnected();
+  void on_mqttMessage(const QByteArray &message, const QMqttTopicName &topic);
 };
 #endif // MAINWINDOW_H

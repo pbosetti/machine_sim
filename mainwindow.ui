@@ -38,7 +38,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Pub topic</string>
+              <string>Sub topic</string>
              </property>
             </widget>
            </item>
@@ -65,7 +65,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>Sub topic</string>
+              <string>Pub topic</string>
              </property>
             </widget>
            </item>
@@ -87,6 +87,13 @@
            </item>
           </layout>
          </item>
+         <item>
+          <widget class="QPushButton" name="connectButton">
+           <property name="text">
+            <string>Connect</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -107,6 +114,12 @@
            </item>
            <item row="0" column="1">
             <widget class="QDoubleSpinBox" name="bangBangLevel">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimum">
               <double>0.000000000000000</double>
              </property>
@@ -130,6 +143,12 @@
            </item>
            <item row="1" column="1">
             <widget class="QDoubleSpinBox" name="bangBangTime">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimum">
               <double>1.000000000000000</double>
              </property>
@@ -147,25 +166,32 @@
           </layout>
          </item>
          <item>
-          <widget class="QCheckBox" name="bangBangX">
-           <property name="text">
-            <string>X</string>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="spacing">
+            <number>0</number>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="bangBangY">
-           <property name="text">
-            <string>Y</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="bangBangZ">
-           <property name="text">
-            <string>Z</string>
-           </property>
-          </widget>
+           <item>
+            <widget class="QCheckBox" name="bangBangY">
+             <property name="text">
+              <string>Y</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="bangBangX">
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="bangBangZ">
+             <property name="text">
+              <string>Z</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -197,6 +223,9 @@
           <layout class="QFormLayout" name="formLayout_5">
            <property name="fieldGrowthPolicy">
             <enum>QFormLayout::ExpandingFieldsGrow</enum>
+           </property>
+           <property name="labelAlignment">
+            <set>Qt::AlignCenter</set>
            </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_5">
@@ -305,6 +334,9 @@
            <property name="fieldGrowthPolicy">
             <enum>QFormLayout::ExpandingFieldsGrow</enum>
            </property>
+           <property name="labelAlignment">
+            <set>Qt::AlignCenter</set>
+           </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_8">
              <property name="text">
@@ -411,6 +443,9 @@
           <layout class="QFormLayout" name="formLayout_7">
            <property name="fieldGrowthPolicy">
             <enum>QFormLayout::ExpandingFieldsGrow</enum>
+           </property>
+           <property name="labelAlignment">
+            <set>Qt::AlignCenter</set>
            </property>
            <item row="0" column="0">
             <widget class="QLabel" name="label_11">
