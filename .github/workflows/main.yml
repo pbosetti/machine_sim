@@ -45,6 +45,11 @@ jobs:
           cache:        true
           setup-python: false
 
+      - name: (7) Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
       - name: (3.5) Build QTMQTT
         working-directory: ${{ runner.temp }}
         run: |
@@ -74,11 +79,6 @@ jobs:
               
       - name: (6) Create build directory
         run:  mkdir ${{ runner.temp }}\build
-
-      - name: (7) Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
 
       - name: (8) Build
         working-directory: ${{ runner.temp }}\build
