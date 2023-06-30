@@ -41,11 +41,11 @@ public:
   // Attributes
 private:
   double _position = 0;
-  double _speed = 0;
   double _time = 0;
-  double _torque = 0;
   QElapsedTimer *_timer;
   quint64 _previousTime = 0;
+  double _speed = 0;
+  double _torque = 0;
   double _errI = 0, _errD = 0;
   double _prevError = 0;
 

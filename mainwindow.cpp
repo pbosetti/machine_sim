@@ -29,6 +29,36 @@ MainWindow::MainWindow(QWidget *parent)
   setLocale(QLocale("EN_en"));
   setAcceptDrops(true);
 
+
+  timeZoomH.setCheckable(true);
+  timeZoomV.setCheckable(true);
+  timeZoomBoth.setCheckable(true);
+  timePlotZoomGroup.addAction(&timeZoomH);
+  timePlotZoomGroup.addAction(&timeZoomV);
+  timePlotZoomGroup.addAction(&timeZoomBoth);
+  traceZoomH.setCheckable(true);
+  traceZoomV.setCheckable(true);
+  traceZoomBoth.setCheckable(true);
+  tracePlotZoomGroup.addAction(&traceZoomH);
+  tracePlotZoomGroup.addAction(&traceZoomV);
+  tracePlotZoomGroup.addAction(&traceZoomBoth);
+  ui->menuZoom->addSeparator()->setText("Time plot");
+  ui->menuZoom->addAction(&timeZoomBoth);
+  ui->menuZoom->addAction(&timeZoomH);
+  ui->menuZoom->addAction(&timeZoomV);
+  ui->menuZoom->addSeparator()->setText("Trace plot");
+  ui->menuZoom->addSeparator();
+  ui->menuZoom->addAction(&traceZoomBoth);
+  ui->menuZoom->addAction(&traceZoomH);
+  ui->menuZoom->addAction(&traceZoomV);
+  timeZoomBoth.setChecked(true);
+  traceZoomBoth.setChecked(true);
+
+  connect(&timePlotZoomGroup, SIGNAL(triggered(QAction *)), this,
+          SLOT(on_actionTimeZoom(QAction *)));
+  connect(&tracePlotZoomGroup, SIGNAL(triggered(QAction *)), this,
+           SLOT(on_actionTimeZoom(QAction *)));
+
   // Set up MQTT
   _client = new QMqttClient(this);
   connect(_client, SIGNAL(disconnected()), this, SLOT(on_brokerDisconnected()));
@@ -60,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
   });
 
+
   // Enable signals from GUI form to machine
   toggleFormConections(On);
 
@@ -68,8 +99,11 @@ MainWindow::MainWindow(QWidget *parent)
   ui->startButton->setToolTip("Load an INI file first");
 
   ui->setPointXSlider->setMaximum(SETPOINT_SLIDER_MAX);
+  ui->setPointXSlider->setTickInterval(SETPOINT_SLIDER_MAX / 4.0);
   ui->setPointYSlider->setMaximum(SETPOINT_SLIDER_MAX);
+  ui->setPointYSlider->setTickInterval(SETPOINT_SLIDER_MAX / 4.0);
   ui->setPointZSlider->setMaximum(SETPOINT_SLIDER_MAX);
+  ui->setPointZSlider->setTickInterval(SETPOINT_SLIDER_MAX / 4.0);
 
   // Setup timePlot
   ui->timePlot->setLocale(QLocale("EN_en"));
@@ -120,23 +154,34 @@ MainWindow::MainWindow(QWidget *parent)
   ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
   ui->timePlot->xAxis->setLabel(QString("Elapsed time"));
   ui->timePlot->yAxis->setLabel(QString("Axis Position (m)"));
+  // double click reset zoom
+  connect(ui->timePlot, &QCustomPlot::mouseDoubleClick, this, [=](){
+    ui->timePlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+  });
+//  connect(this, SIGNA
+
 
   // Setup XY plot
-  _xyCurveRapid = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  _xyCurveRapid = new QCPCurve(ui->tracePlot->xAxis, ui->tracePlot->yAxis);
   _xyCurveRapid->setPen(QPen(QColor(200, 0, 0)));
-  _xyCurveInterp = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  _xyCurveInterp = new QCPCurve(ui->tracePlot->xAxis, ui->tracePlot->yAxis);
   _xyCurveInterp->setPen(QPen(QColor(0, 0, 200)));
-  _xyCurvePosition = new QCPCurve(ui->xYPlot->xAxis, ui->xYPlot->yAxis);
+  _xyCurvePosition = new QCPCurve(ui->tracePlot->xAxis, ui->tracePlot->yAxis);
   _xyCurvePosition->setPen(QPen(QColor(0, 200, 0)));
-  ui->xYPlot->setLocale(QLocale("EN_en"));
-  ui->xYPlot->axisRect()->setupFullAxesBox();
-  ui->xYPlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
-  ui->xYPlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
-  ui->xYPlot->setInteraction(QCP::iRangeDrag, true);
-  ui->xYPlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
-  ui->xYPlot->setInteraction(QCP::iRangeZoom, true);
-  ui->xYPlot->xAxis->setLabel(QString("X (m)"));
-  ui->xYPlot->yAxis->setLabel(QString("Y (m)"));
+  ui->tracePlot->setLocale(QLocale("EN_en"));
+  ui->tracePlot->axisRect()->setupFullAxesBox();
+  ui->tracePlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
+  ui->tracePlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+  ui->tracePlot->setInteraction(QCP::iRangeDrag, true);
+  ui->tracePlot->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
+  ui->tracePlot->setInteraction(QCP::iRangeZoom, true);
+  ui->tracePlot->xAxis->setLabel(QString("X (m)"));
+  ui->tracePlot->yAxis->setLabel(QString("Y (m)"));
+  // Double click reset zoom
+  connect(ui->tracePlot, &QCustomPlot::mouseDoubleClick, this, [=](){
+    ui->tracePlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
+    ui->tracePlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+  });
 
   // Timed action for reading data from axes
   QTimer *plotTimer = new QTimer(this);
@@ -159,7 +204,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
     ui->timePlot->replot();
     _xyCurvePosition->addData(x, y);
-    ui->xYPlot->replot();
+    ui->tracePlot->replot();
   });
   plotTimer->start(20);
 
@@ -194,6 +239,21 @@ MainWindow::MainWindow(QWidget *parent)
     }
   });
 
+//  QTimer *debugTimer = new QTimer(this);
+//  connect(debugTimer, &QTimer::timeout, this, [=]() {
+//    if (!_running) return;
+//    double e =  _machine[AxisTag::Z]->setpoint - _machine[AxisTag::Z]->position();
+//    double ei = _machine[AxisTag::Z]->_errI;
+//    double ed = _machine[AxisTag::Z]->_errD;
+//    double s = _machine[AxisTag::Z]->_speed;
+//    double t =  _machine[AxisTag::Z]->_torque;
+//    qDebug() << "e: " << e <<
+//        ", ei: " << ei <<
+//        ", ed: " << ed <<
+//        ", T: " << t <<
+//        ", v: " << s;
+//  });
+//  debugTimer->start(250);
 }
 
 MainWindow::~MainWindow() {
@@ -345,6 +405,22 @@ void MainWindow::dropEvent(QDropEvent *e) {
 //  \___ \| |/ _ \| __/ __|
 //   ___) | | (_) | |_\__ \
 //  |____/|_|\___/ \__|___/
+
+void MainWindow::on_actionTimeZoom(QAction *action) {
+  if (action == &timeZoomBoth) {
+    ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+  } else if (action == &timeZoomH) {
+    ui->timePlot->axisRect()->setRangeZoom(Qt::Horizontal);
+  } else if (action == &timeZoomV) {
+    ui->timePlot->axisRect()->setRangeZoom(Qt::Vertical);
+  } else if (action == &traceZoomBoth) {
+    ui->tracePlot->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
+  } else if (action == &traceZoomH) {
+    ui->tracePlot->axisRect()->setRangeZoom(Qt::Horizontal);
+  } else if (action == &traceZoomV) {
+    ui->tracePlot->axisRect()->setRangeZoom(Qt::Vertical);
+  }
+}
 
 // Update machine when GUI data change
 void MainWindow::on_formDataChanged() {

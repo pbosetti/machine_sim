@@ -39,6 +39,14 @@ private:
   QMqttTopicName _positionTopic;
   bool _rapid = false;
 
+  QActionGroup timePlotZoomGroup = QActionGroup(this);
+  QAction timeZoomH = QAction("Time Zoom horizontal", this);
+  QAction timeZoomV = QAction("Time Zoom vertical", this);
+  QAction timeZoomBoth = QAction("Time Zoom both", this);
+  QActionGroup tracePlotZoomGroup = QActionGroup(this);
+  QAction traceZoomH = QAction("Trace Zoom horizontal", this);
+  QAction traceZoomV = QAction("Trace Zoom vertical", this);
+  QAction traceZoomBoth = QAction("Trace Zoom both", this);
 
   // Events
   void dragEnterEvent(QDragEnterEvent *e);
@@ -51,6 +59,7 @@ private:
   // Slots
 private slots:
   void on_action_Open_INI_file_triggered();
+  void on_actionTimeZoom(QAction *action);
   void on_machineDataChanged();
   void on_startButtonClicked();
   void on_connectButtonClicked();
