@@ -34,6 +34,10 @@ qt_add_executable(machine_sim
     ${PROJECT_SOURCES}
 )
 
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "-Wa,-mbig-obj")
+endif()
+
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Mqtt)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::PrintSupport)

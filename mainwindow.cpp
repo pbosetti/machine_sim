@@ -54,10 +54,10 @@ MainWindow::MainWindow(QWidget *parent)
   timeZoomBoth.setChecked(true);
   traceZoomBoth.setChecked(true);
 
-  connect(&timePlotZoomGroup, SIGNAL(triggered(QAction *)), this,
-          SLOT(on_actionTimeZoom(QAction *)));
-  connect(&tracePlotZoomGroup, SIGNAL(triggered(QAction *)), this,
-           SLOT(on_actionTimeZoom(QAction *)));
+  connect(&timePlotZoomGroup, SIGNAL(triggered(QAction*)), this,
+          SLOT(on_actionTimeZoom(QAction*)));
+  connect(&tracePlotZoomGroup, SIGNAL(triggered(QAction*)), this,
+           SLOT(on_actionTimeZoom(QAction*)));
 
   // Set up MQTT
   _client = new QMqttClient(this);
@@ -157,6 +157,7 @@ MainWindow::MainWindow(QWidget *parent)
   // double click reset zoom
   connect(ui->timePlot, &QCustomPlot::mouseDoubleClick, this, [=](){
     ui->timePlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+      ui->timePlot->replot();
   });
 //  connect(this, SIGNA
 
@@ -181,6 +182,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(ui->tracePlot, &QCustomPlot::mouseDoubleClick, this, [=](){
     ui->tracePlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
     ui->tracePlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+    ui->tracePlot->replot();
   });
 
   // Timed action for reading data from axes
