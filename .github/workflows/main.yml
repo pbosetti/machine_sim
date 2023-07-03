@@ -84,9 +84,9 @@ jobs:
         run:  |
               cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
               cmake --build build
-              mkdir ${{ runner.temp }}\machine_sim
-              cp build\machine_sim.exe ${{ runner.temp }}\machine_sim
-              cd ${{ runner.temp }}\machine_sim
+              mkdir -p ${{ runner.temp }}\deploy\machine_sim
+              cp build\machine_sim.exe ${{ runner.temp }}\deploy\machine_sim
+              cd ${{ runner.temp }}\deploy\machine_sim
               windeployqt --qmldir ${{ env.SOURCE_DIR }} machine_sim.exe --pdb --release --compiler-runtime --no-translations
               copy C:\Windows\System32\concrt140.dll . 
               copy C:\Windows\System32\vccorlib140.dll .
@@ -102,4 +102,4 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}\machine_sim
+          path: ${{ runner.temp }}\deploy\machine_sim
