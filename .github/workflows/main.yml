@@ -77,16 +77,16 @@ jobs:
       #         7z x jom.zip -ojom
               
       - name: (7) Create build directory
-        run:  mkdir ${{ runner.temp }}\build
+        run:  mkdir ${{ env.SOURCE_DIR }}\build
 
       - name: (8) Configure and build
-        working-directory: ${{ runner.temp }}\build
+        working-directory: ${{ env.SOURCE_DIR }}
         run:  |
               cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
               cmake --build build
-              mkdir deploy
-              cp build\machine_sim.exe deploy
-              cd deploy
+              mkdir ${{ runner.temp }}\deploy
+              cp build\machine_sim.exe ${{ runner.temp }}\deploy
+              cd ${{ runner.temp }}\deploy
               windeployqt --qmldir ${{ env.SOURCE_DIR }} machine_sim.exe --pdb --release --compiler-runtime
               copy C:\Windows\System32\concrt140.dll . 
               copy C:\Windows\System32\vccorlib140.dll .
