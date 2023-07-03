@@ -84,22 +84,22 @@ jobs:
         run:  |
               cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
               cmake --build build
-              mkdir ${{ runner.temp }}\deploy
-              cp build\machine_sim.exe ${{ runner.temp }}\deploy
-              cd ${{ runner.temp }}\deploy
-              windeployqt --qmldir ${{ env.SOURCE_DIR }} machine_sim.exe --pdb --release --compiler-runtime
+              mkdir ${{ runner.temp }}\machine_sim
+              cp build\machine_sim.exe ${{ runner.temp }}\machine_sim
+              cd ${{ runner.temp }}\machine_sim
+              windeployqt --qmldir ${{ env.SOURCE_DIR }} machine_sim.exe --pdb --release --compiler-runtime --no-translations
               copy C:\Windows\System32\concrt140.dll . 
               copy C:\Windows\System32\vccorlib140.dll .
               copy C:\Windows\System32\msvcp140.dll .
               copy C:\Windows\System32\vcruntime140.dll .
               
-      - name: (9) Zip build
-        working-directory: ${{ runner.temp }}
-        run:  |
-              7z a machine_sim.zip ${{ runner.temp }}\deploy\* -r
+      # - name: (9) Zip build
+      #   working-directory: ${{ runner.temp }}
+      #   run:  |
+      #         7z a machine_sim.zip machine_sim\* -r
               
       - name: (10) Save build artifact
         uses: actions/upload-artifact@master
         with:
           name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}\${{ env.ARTIFACT }}
+          path: ${{ runner.temp }}\machine_sim
