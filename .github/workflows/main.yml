@@ -45,47 +45,48 @@ jobs:
           cache:        true
           setup-python: false
 
-      - name: (7) Set up Visual Studio shell
+      - name: (4) Set up Visual Studio shell
         uses: egor-tensin/vs-shell@v2
         with:
           arch: x64
 
-      - name: (3.5) Build QTMQTT
+      - name: (5) Clone and configure QTMQTT
         working-directory: ${{ runner.temp }}
         run: |
              git clone https://github.com/qt/qtmqtt.git
              cd qtmqtt
              git checkout v${{ env.QT_VERSION }}
              cmake.exe -B build -DCMAKE_GENERATOR=Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=\a\_temp\Qt\6.5.1\msvc2019_64 -DCMAKE_CXX_FLAGS_INIT=
-            #  cmake -LAH build
 
-      - name: Build QTMQTT
+      - name: (6) Build QTMQTT
         working-directory: ${{ runner.temp }}/qtmqtt
         run: |
              cmake --build build -j4
              dir build\bin
              cmake --install build
 
-      - name: (4) Download JOM
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url:    http://download.qt.io/official_releases/jom/jom.zip
-          target: ${{ runner.temp }}\
+      # - name: (7) Download JOM
+      #   uses: suisei-cn/actions-download-file@v1
+      #   with:
+      #     url:    http://download.qt.io/official_releases/jom/jom.zip
+      #     target: ${{ runner.temp }}\
 
-      - name: (5) Unzip JOM
-        working-directory: ${{ runner.temp }}
-        run:  |
-              7z x jom.zip -ojom
+      # - name: (5) Unzip JOM
+      #   working-directory: ${{ runner.temp }}
+      #   run:  |
+      #         7z x jom.zip -ojom
               
-      - name: (6) Create build directory
+      - name: (7) Create build directory
         run:  mkdir ${{ runner.temp }}\build
 
-      - name: (8) Build
+      - name: (8) Configure and build
         working-directory: ${{ runner.temp }}\build
         run:  |
-              qmake -r ${{ env.SOURCE_DIR }}\machine_sim.pro
-              ${{ runner.temp }}\jom\jom -j2
-              cd release
+              cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
+              cmake --build build
+              mkdir deploy
+              cp build\machine_sim.exe deploy
+              cd deploy
               windeployqt --qmldir ${{ env.SOURCE_DIR }} machine_sim.exe --pdb --release --compiler-runtime
               copy C:\Windows\System32\concrt140.dll . 
               copy C:\Windows\System32\vccorlib140.dll .
@@ -95,7 +96,7 @@ jobs:
       - name: (9) Zip build
         working-directory: ${{ runner.temp }}
         run:  |
-              7z a machine_sim-build.zip ${{ runner.temp }}\build\* -r
+              7z a machine_sim-build.zip ${{ runner.temp }}\deploy\* -r
               
       - name: (10) Save build artifact
         uses: actions/upload-artifact@master
