@@ -96,7 +96,7 @@ jobs:
       - name: (9) Zip build
         working-directory: ${{ runner.temp }}
         run:  |
-              7z a machine_sim-build.zip ${{ runner.temp }}\deploy\* -r
+              7z a machine_sim.zip ${{ runner.temp }}\deploy\* -r
               
       - name: (10) Save build artifact
         uses: actions/upload-artifact@master
