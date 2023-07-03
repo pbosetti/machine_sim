@@ -99,7 +99,7 @@ void Machine::reset() {
   for (AxisTag axis : _axesTags) {
     _axes[axis]->reset();
   }
-  emit dataHasChanged();
+//  emit dataHasChanged();
 }
 
 double Machine::link_axes(QList<AxisTag> names) {

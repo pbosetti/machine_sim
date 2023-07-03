@@ -189,16 +189,16 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QCheckBox" name="bangBangY">
+            <widget class="QCheckBox" name="bangBangX">
              <property name="text">
-              <string>Y</string>
+              <string>X</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="bangBangX">
+            <widget class="QCheckBox" name="bangBangY">
              <property name="text">
-              <string>X</string>
+              <string>Y</string>
              </property>
             </widget>
            </item>
@@ -320,7 +320,7 @@
               <enum>QSlider::TicksBelow</enum>
              </property>
              <property name="tickInterval">
-              <number>0</number>
+              <number>333</number>
              </property>
             </widget>
            </item>
@@ -333,6 +333,9 @@
            </item>
            <item row="4" column="1">
             <widget class="QProgressBar" name="xPositionBar">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="value">
               <number>24</number>
              </property>
@@ -347,7 +350,7 @@
               <bool>true</bool>
              </property>
              <property name="digitCount">
-              <number>6</number>
+              <number>7</number>
              </property>
              <property name="segmentStyle">
               <enum>QLCDNumber::Flat</enum>
@@ -442,7 +445,10 @@
               <enum>Qt::Horizontal</enum>
              </property>
              <property name="tickPosition">
-              <enum>QSlider::TicksAbove</enum>
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -462,7 +468,7 @@
               <bool>true</bool>
              </property>
              <property name="digitCount">
-              <number>6</number>
+              <number>7</number>
              </property>
              <property name="segmentStyle">
               <enum>QLCDNumber::Flat</enum>
@@ -471,6 +477,9 @@
            </item>
            <item row="4" column="1">
             <widget class="QProgressBar" name="yPositionBar">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="value">
               <number>24</number>
              </property>
@@ -564,7 +573,10 @@
               <enum>Qt::Horizontal</enum>
              </property>
              <property name="tickPosition">
-              <enum>QSlider::TicksAbove</enum>
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -584,7 +596,7 @@
               <bool>true</bool>
              </property>
              <property name="digitCount">
-              <number>6</number>
+              <number>7</number>
              </property>
              <property name="segmentStyle">
               <enum>QLCDNumber::Flat</enum>
@@ -593,6 +605,9 @@
            </item>
            <item row="4" column="1">
             <widget class="QProgressBar" name="zPositionBar">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="value">
               <number>24</number>
              </property>
@@ -620,7 +635,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="2">
-         <widget class="QCustomPlot" name="xYPlot" native="true"/>
+         <widget class="QCustomPlot" name="tracePlot" native="true"/>
         </item>
         <item row="0" column="0">
          <widget class="QCustomPlot" name="timePlot" native="true"/>
@@ -650,7 +665,7 @@
      <x>0</x>
      <y>0</y>
      <width>872</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Open_INI_file">
@@ -659,7 +674,13 @@
     </property>
     <addaction name="action_Open_INI_file"/>
    </widget>
+   <widget class="QMenu" name="menuZoom">
+    <property name="title">
+     <string>Plot</string>
+    </property>
+   </widget>
    <addaction name="menu_Open_INI_file"/>
+   <addaction name="menuZoom"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_Open_INI_file">
@@ -685,22 +706,5 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>zPositionBar</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>zPositionText</receiver>
-   <slot>display(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>842</x>
-     <y>333</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>667</x>
-     <y>337</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -77,7 +77,7 @@ void Axis::pid(double dt) {
   double out, err;
   err = setpoint - _position;
   if (i)
-    _errI += (err + _prevError) * dt / 2.0;
+    _errI += err * dt * 0.9;
   if (d && dt > 0)
     _errD = (err - _prevError) / dt;
   _prevError = err;
