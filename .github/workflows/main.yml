@@ -56,7 +56,7 @@ jobs:
              git clone https://github.com/qt/qtmqtt.git
              cd qtmqtt
              git checkout v${{ env.QT_VERSION }}
-             cmake -Bbuild -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG:STRING=/Z7 -DCMAKE_C_FLAGS_DEBUG:STRING=/Z7
+             cmake.exe -B build -DCMAKE_GENERATOR=Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=\a\_temp\Qt\6.5.1\msvc2019_64 -DCMAKE_CXX_FLAGS_INIT=
             #  cmake -LAH build
 
       - name: Build QTMQTT
