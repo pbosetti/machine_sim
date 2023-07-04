@@ -75,7 +75,7 @@ jobs:
               cmake --build build
 
       - name: (8) Package
-        working-directory: $${{ env.SOURCE_DIR }}
+        working-directory: ${{ env.SOURCE_DIR }}
         run: |
               mkdir -p deploy\${{ env.PROGRAM }}
               cp build\${{ env.PROGRAM }}.exe deploy\${{ env.PROGRAM }}
@@ -86,7 +86,7 @@ jobs:
               copy C:\Windows\System32\msvcp140.dll .
               copy C:\Windows\System32\vcruntime140.dll .
               
-      - name: (10) Save build artifact
+      - name: (9) Save build artifact
         uses: actions/upload-artifact@master
         with:
           name: ${{ env.PROGRAM }}
