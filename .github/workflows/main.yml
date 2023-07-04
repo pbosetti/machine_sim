@@ -95,11 +95,12 @@ jobs:
       #         ls ${{ env.SOURCE_DIR }}
       #         ls ${{ env.SOURCE_DIR }}\${{env.PROGRAM }}.zip
 
-      - name: Create Release
+      - name: (9) Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref }}
           name: Latest binary release
+          body: Latest binary release for Windows, built on ${{ github.event.repository.updated_at}}
           files: machine_sim.zip
 
 
