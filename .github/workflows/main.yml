@@ -67,7 +67,7 @@ jobs:
              dir build\bin
              cmake --install build
 
-      - name: (7) Configure and build
+      - name: (7) Configure and build project
         working-directory: ${{ env.SOURCE_DIR }}
         run:  |
               mkdir ${{ env.SOURCE_DIR }}\build
@@ -90,18 +90,41 @@ jobs:
 
       - name: (9) List contents
         run: |
+              pwd
               ls ${{ env.SOURCE_DIR }}
               ls ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
-              
-      - name: (10) Create Release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          title: Latest Release
-          automatic_release_tag: "latest"
-          prerelease: false
-          files: ${{ env.SOURCE_DIR }}/${{ env.PROGRAM }}.zip
 
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: Latest binary release
+          files: ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
+
+      # - name: (11) Upload artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ env.PROGRAM }}.zip
+      #     path: ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
+              
+      # - name: (10) Create Release
+      #   id: create-release
+      #   uses: marvinpinto/action-automatic-releases@latest
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     title: Latest Release
+      #     automatic_release_tag: "latest"
+      #     prerelease: false
+
+      # - name: (11) Attach artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create-release.outputs.upload_url }}
+      #     asset_path: ${{ env.SOURCE_DIR }}/${{ env.PROGRAM }}.zip
+      #     asset_name: ${{ env.PROGRAM }}.zip
+      #     asset_content_type: application/gzip
 
 
 
