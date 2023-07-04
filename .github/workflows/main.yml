@@ -92,7 +92,7 @@ jobs:
         run: |
               cd ${{env.SOURCE_DIR }}
               mkdir -p deploy/${{ env.PROGRAM }}
-              cp src/* deploy/${{ env.PROGRAM }}
+              cp *.cpp deploy/${{ env.PROGRAM }}
               7z a ${{ env.PROGRAM }}.zip deploy\*
               pwd
               ls ${{ env.SOURCE_DIR }}
@@ -103,7 +103,7 @@ jobs:
         with:
           tag_name: latest
           name: Latest binary release
-          files: ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
+          files: /d/a/machine_sim/machine_sim/machine_sim.zip
 
       # - name: (11) Upload artifact
       #   uses: actions/upload-artifact@v3
