@@ -94,6 +94,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: Latest Release
+          tag_name: latest
           files: ${{ env.SOURCE_DIR }}\${{ env.PROGRAM }}.zip
 
 
