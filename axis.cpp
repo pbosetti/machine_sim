@@ -55,7 +55,7 @@ void Axis::run() {
       emit outOfLimits(objectName());
       break;
     }
-    usleep(integration_dt);
+    QObject().thread()->usleep(integration_dt);
   }
   qDebug() << "Stopped thread for axis " << objectName()
            << " at time " + QString::number(_timer->nsecsElapsed());

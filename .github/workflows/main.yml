@@ -2,13 +2,8 @@ name: Windows Release
 
 on:
   push:
-    branches:
-      - 'continuous-integration'
     tags:
       - 'v*'
-  pull_request:
-    branches:
-    - 'continuous-integration'
 
 defaults:
   run:
@@ -16,8 +11,8 @@ defaults:
 
 env:
   SOURCE_DIR:   ${{ github.workspace }}
-  QT_VERSION:   6.5.0
-  ARTIFACT:     machine_sim.zip
+  QT_VERSION:   6.5.1
+  PROGRAM:      machine_sim
 
 jobs:
   build:
@@ -33,7 +28,13 @@ jobs:
         working-directory:  ${{ github.workspace }}
         run: |
           git fetch --all --tags -f
-      - name: (3) Install Qt
+
+      - name: (3) Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+
+      - name: (4) Install Qt
         uses: jurplel/install-qt-action@v3
         with:
           version:      ${{ env.QT_VERSION }}
@@ -41,48 +42,69 @@ jobs:
           target:       desktop
           arch:         win64_msvc2019_64
           dir:          ${{ runner.temp }}
-          modules:      qtcharts # mqtt printsupport
+          modules:      qtcharts qtwebsockets # mqtt printsupport
           cache:        true
           setup-python: false
 
-      - name: (4) Download JOM
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url:    http://download.qt.io/official_releases/jom/jom.zip
-          target: ${{ runner.temp }}\
-
-      - name: (5) Unzip JOM
+      - name: (5) Clone QTMQTT
         working-directory: ${{ runner.temp }}
-        run:  |
-              7z x jom.zip -ojom
-              
-      - name: (6) Create build directory
-        run:  mkdir ${{ runner.temp }}\build
+        run: |
+             git clone https://github.com/qt/qtmqtt.git
+             cd qtmqtt
+             git checkout v${{ env.QT_VERSION }}
 
-      - name: (7) Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
 
-      - name: (8) Build
-        working-directory: ${{ runner.temp }}\build
+      - name: (6) Configure and Build QTMQTT
+        working-directory: ${{ runner.temp }}/qtmqtt
+        run: |
+            cmake.exe -B build -DCMAKE_GENERATOR=Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=\a\_temp\Qt\6.5.1\msvc2019_64 -DCMAKE_CXX_FLAGS_INIT=
+             cmake --build build -j4
+             dir build\bin
+             cmake --install build
+
+      - name: (7) Configure and build project
+        working-directory: ${{ env.SOURCE_DIR }}
         run:  |
-              qmake -r ${{ env.SOURCE_DIR }}\machine_sim.pro
-              ${{ runner.temp }}\jom\jom -j2
-              cd release
-              windeployqt --qmldir ${{ env.SOURCE_DIR }} machine_sim.exe --pdb --release --compiler-runtime
+              mkdir ${{ env.SOURCE_DIR }}\build
+              cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
+              cmake --build build
+
+      - name: (8) Package
+        working-directory: ${{ env.SOURCE_DIR }}
+        run: |
+              mkdir -p deploy\${{ env.PROGRAM }}
+              cp build\${{ env.PROGRAM }}.exe deploy\${{ env.PROGRAM }}
+              cd deploy\${{ env.PROGRAM }}
+              windeployqt --qmldir ${{ env.SOURCE_DIR }} ${{ env.PROGRAM }}.exe --pdb --release --compiler-runtime --no-translations
               copy C:\Windows\System32\concrt140.dll . 
               copy C:\Windows\System32\vccorlib140.dll .
               copy C:\Windows\System32\msvcp140.dll .
               copy C:\Windows\System32\vcruntime140.dll .
-              
-      - name: (9) Zip build
-        working-directory: ${{ runner.temp }}
-        run:  |
-              7z a machine_sim-build.zip ${{ runner.temp }}\build\* -r
-              
-      - name: (10) Save build artifact
-        uses: actions/upload-artifact@master
+              cd ${{ env.SOURCE_DIR }}\deploy
+              7z a ..\${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
+
+      # - name: (9) List contents
+      #   run: |
+      #         pwd
+      #         cd ${{env.SOURCE_DIR }}
+      #         mkdir -p deploy\${{ env.PROGRAM }}
+      #         cp *.cpp deploy\${{ env.PROGRAM }}
+      #         cd deploy
+      #         7z a ..\${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
+      #         cd ${{env.SOURCE_DIR }}
+      #         ls ${{ env.SOURCE_DIR }}
+      #         ls ${{ env.SOURCE_DIR }}\${{env.PROGRAM }}.zip
+
+      - name: (9) Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}\${{ env.ARTIFACT }}
+          tag_name: ${{ github.ref }}
+          name: Latest binary release
+          body: Latest binary release for Windows, built on ${{ github.event.repository.updated_at}}
+          files: machine_sim.zip
+
+
+
+
+
+        

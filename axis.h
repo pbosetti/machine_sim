@@ -4,7 +4,7 @@
 #include "QtCore/qdebug.h"
 #include <QObject>
 #include <QThread>
-#include <unistd.h>
+//#include <unistd.h>
 
 #define GRAVITY 9.81f
 
@@ -30,7 +30,7 @@ public:
   double max_torque = 20;
   double pitch = 0.01;
   double gravity = 0;
-  useconds_t integration_dt = 5;
+  unsigned long integration_dt = 5;
   double p = 0, i = 0, d = 0;
   double setpoint = 0.0;
 
