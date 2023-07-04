@@ -87,7 +87,45 @@ jobs:
               copy C:\Windows\System32\vcruntime140.dll .
               
       - name: (9) Save build artifact
+        id: build_artifact
         uses: actions/upload-artifact@master
         with:
-          name: ${{ env.PROGRAM }}
+          name: ${{ env.PROGRAM }}.zip
           path: ${{ env.SOURCE_DIR }}\deploy
+
+      - name: list
+        working-directory: ${{ env.SOURCE_DIR }}
+        run: |
+              ls .
+              echo "artifact: " ${{ steps.build_artifact.outputs.path }}
+
+      - name: (10) Create Draft release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: 
+          tag_name: test
+          release_name: latest
+          draft: true
+          prerelease: false
+
+      - name: (11) Upload artifact
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.build_artifact.outputs.path }}
+          asset_name: ${{ env.PROGRAM }}.zip
+          asset_content_type: application/zip
+      
+      - name: (12) Publish release
+        uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
+
+
+        
