@@ -85,12 +85,13 @@ jobs:
               copy C:\Windows\System32\vccorlib140.dll .
               copy C:\Windows\System32\msvcp140.dll .
               copy C:\Windows\System32\vcruntime140.dll .
-
-      - name: (9) Make zip
-        working-directory: ${{ env.SOURCE_DIR }}
-        run: |
+              cd ${{ env.SOURCE_DIR }}
               7z a ${{ env.PROGRAM }}.zip deploy\*
-              ls
+
+      - name: (9) List contents
+        run: |
+              ls ${{ env.SOURCE_DIR }}
+              ls ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
               
       - name: (10) Create Release
         uses: marvinpinto/action-automatic-releases@latest
@@ -99,7 +100,7 @@ jobs:
           title: Latest Release
           automatic_release_tag: "latest"
           prerelease: false
-          files: ${{ env.SOURCE_DIR }}\${{ env.PROGRAM }}.zip
+          files: ${{ env.SOURCE_DIR }}/${{ env.PROGRAM }}.zip
 
 
 
