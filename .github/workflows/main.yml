@@ -95,7 +95,7 @@ jobs:
               mkdir -p deploy\${{ env.PROGRAM }}
               cp *.cpp deploy\${{ env.PROGRAM }}
               cd deploy
-              7z a ${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
+              7z a ..\${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
               cd ${{env.SOURCE_DIR }}
               ls ${{ env.SOURCE_DIR }}
               ls ${{ env.SOURCE_DIR }}\${{env.PROGRAM }}.zip
