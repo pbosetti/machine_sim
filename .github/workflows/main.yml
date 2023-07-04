@@ -90,20 +90,20 @@ jobs:
 
       - name: (9) List contents
         run: |
-              cd ${{env.SOURCE_DIR }}
-              mkdir -p deploy/${{ env.PROGRAM }}
-              cp *.cpp deploy/${{ env.PROGRAM }}
-              7z a ${{ env.PROGRAM }}.zip deploy\*
               pwd
+              cd ${{env.SOURCE_DIR }}
+              mkdir -p deploy\${{ env.PROGRAM }}
+              cp *.cpp deploy\${{ env.PROGRAM }}
+              7z a ${{ env.PROGRAM }}.zip deploy\*
               ls ${{ env.SOURCE_DIR }}
-              ls ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
+              ls ${{ env.SOURCE_DIR }}\${{env.PROGRAM }}.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
           name: Latest binary release
-          files: /d/a/machine_sim/machine_sim/machine_sim.zip
+          files: machine_sim.zip
 
       # - name: (11) Upload artifact
       #   uses: actions/upload-artifact@v3
