@@ -2,13 +2,8 @@ name: Windows Release
 
 on:
   push:
-    branches:
-      - 'continuous-integration'
     tags:
       - 'v*'
-  pull_request:
-    branches:
-    - 'continuous-integration'
 
 defaults:
   run:
@@ -34,103 +29,79 @@ jobs:
         run: |
           git fetch --all --tags -f
 
-      # - name: (3) Set up Visual Studio shell
-      #   uses: egor-tensin/vs-shell@v2
-      #   with:
-      #     arch: x64
+      - name: (3) Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
 
-      # - name: (4) Install Qt
-      #   uses: jurplel/install-qt-action@v3
-      #   with:
-      #     version:      ${{ env.QT_VERSION }}
-      #     host:         windows
-      #     target:       desktop
-      #     arch:         win64_msvc2019_64
-      #     dir:          ${{ runner.temp }}
-      #     modules:      qtcharts qtwebsockets # mqtt printsupport
-      #     cache:        true
-      #     setup-python: false
+      - name: (4) Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version:      ${{ env.QT_VERSION }}
+          host:         windows
+          target:       desktop
+          arch:         win64_msvc2019_64
+          dir:          ${{ runner.temp }}
+          modules:      qtcharts qtwebsockets # mqtt printsupport
+          cache:        true
+          setup-python: false
 
-      # - name: (5) Clone QTMQTT
-      #   working-directory: ${{ runner.temp }}
-      #   run: |
-      #        git clone https://github.com/qt/qtmqtt.git
-      #        cd qtmqtt
-      #        git checkout v${{ env.QT_VERSION }}
-
-
-      # - name: (6) Configure and Build QTMQTT
-      #   working-directory: ${{ runner.temp }}/qtmqtt
-      #   run: |
-      #       cmake.exe -B build -DCMAKE_GENERATOR=Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=\a\_temp\Qt\6.5.1\msvc2019_64 -DCMAKE_CXX_FLAGS_INIT=
-      #        cmake --build build -j4
-      #        dir build\bin
-      #        cmake --install build
-
-      # - name: (7) Configure and build project
-      #   working-directory: ${{ env.SOURCE_DIR }}
-      #   run:  |
-      #         mkdir ${{ env.SOURCE_DIR }}\build
-      #         cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
-      #         cmake --build build
-
-      # - name: (8) Package
-      #   working-directory: ${{ env.SOURCE_DIR }}
-      #   run: |
-      #         mkdir -p deploy\${{ env.PROGRAM }}
-      #         cp build\${{ env.PROGRAM }}.exe deploy\${{ env.PROGRAM }}
-      #         cd deploy\${{ env.PROGRAM }}
-      #         windeployqt --qmldir ${{ env.SOURCE_DIR }} ${{ env.PROGRAM }}.exe --pdb --release --compiler-runtime --no-translations
-      #         copy C:\Windows\System32\concrt140.dll . 
-      #         copy C:\Windows\System32\vccorlib140.dll .
-      #         copy C:\Windows\System32\msvcp140.dll .
-      #         copy C:\Windows\System32\vcruntime140.dll .
-      #         cd ${{ env.SOURCE_DIR }}
-      #         7z a ${{ env.PROGRAM }}.zip deploy\*
-
-      - name: (9) List contents
+      - name: (5) Clone QTMQTT
+        working-directory: ${{ runner.temp }}
         run: |
-              pwd
-              cd ${{env.SOURCE_DIR }}
+             git clone https://github.com/qt/qtmqtt.git
+             cd qtmqtt
+             git checkout v${{ env.QT_VERSION }}
+
+
+      - name: (6) Configure and Build QTMQTT
+        working-directory: ${{ runner.temp }}/qtmqtt
+        run: |
+            cmake.exe -B build -DCMAKE_GENERATOR=Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=\a\_temp\Qt\6.5.1\msvc2019_64 -DCMAKE_CXX_FLAGS_INIT=
+             cmake --build build -j4
+             dir build\bin
+             cmake --install build
+
+      - name: (7) Configure and build project
+        working-directory: ${{ env.SOURCE_DIR }}
+        run:  |
+              mkdir ${{ env.SOURCE_DIR }}\build
+              cmake.exe -B build -DCMAKE_GENERATOR:STRING=Ninja -DCMAKE_BUILD_TYPE:STRING=Release "-DCMAKE_PREFIX_PATH:PATH=\a\_temp\Qt\6.5.1\msvc2019_64" "-DCMAKE_CXX_FLAGS_INIT:STRING="
+              cmake --build build
+
+      - name: (8) Package
+        working-directory: ${{ env.SOURCE_DIR }}
+        run: |
               mkdir -p deploy\${{ env.PROGRAM }}
-              cp *.cpp deploy\${{ env.PROGRAM }}
-              cd deploy
+              cp build\${{ env.PROGRAM }}.exe deploy\${{ env.PROGRAM }}
+              cd deploy\${{ env.PROGRAM }}
+              windeployqt --qmldir ${{ env.SOURCE_DIR }} ${{ env.PROGRAM }}.exe --pdb --release --compiler-runtime --no-translations
+              copy C:\Windows\System32\concrt140.dll . 
+              copy C:\Windows\System32\vccorlib140.dll .
+              copy C:\Windows\System32\msvcp140.dll .
+              copy C:\Windows\System32\vcruntime140.dll .
+              cd ${{ env.SOURCE_DIR }}\deploy
               7z a ..\${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
-              cd ${{env.SOURCE_DIR }}
-              ls ${{ env.SOURCE_DIR }}
-              ls ${{ env.SOURCE_DIR }}\${{env.PROGRAM }}.zip
+
+      # - name: (9) List contents
+      #   run: |
+      #         pwd
+      #         cd ${{env.SOURCE_DIR }}
+      #         mkdir -p deploy\${{ env.PROGRAM }}
+      #         cp *.cpp deploy\${{ env.PROGRAM }}
+      #         cd deploy
+      #         7z a ..\${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
+      #         cd ${{env.SOURCE_DIR }}
+      #         ls ${{ env.SOURCE_DIR }}
+      #         ls ${{ env.SOURCE_DIR }}\${{env.PROGRAM }}.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: latest
+          tag_name: ${{ github.ref }}
           name: Latest binary release
           files: machine_sim.zip
 
-      # - name: (11) Upload artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ env.PROGRAM }}.zip
-      #     path: ${{ env.SOURCE_DIR }}/${{env.PROGRAM }}.zip
-              
-      # - name: (10) Create Release
-      #   id: create-release
-      #   uses: marvinpinto/action-automatic-releases@latest
-      #   with:
-      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
-      #     title: Latest Release
-      #     automatic_release_tag: "latest"
-      #     prerelease: false
-
-      # - name: (11) Attach artifact
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create-release.outputs.upload_url }}
-      #     asset_path: ${{ env.SOURCE_DIR }}/${{ env.PROGRAM }}.zip
-      #     asset_name: ${{ env.PROGRAM }}.zip
-      #     asset_content_type: application/gzip
 
 
 
