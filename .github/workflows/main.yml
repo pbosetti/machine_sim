@@ -88,13 +88,17 @@ jobs:
 
       - name: (9) Make zip
         working-directory: ${{ env.SOURCE_DIR }}
-        run: 7z a ${{ env.PROGRAM }}.zip deploy\*
+        run: |
+              7z a ${{ env.PROGRAM }}.zip deploy\*
+              ls
               
       - name: (10) Create Release
-        uses: softprops/action-gh-release@v1
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          name: Latest Release
-          tag_name: latest
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          title: Latest Release
+          automatic_release_tag: "latest"
+          prerelease: false
           files: ${{ env.SOURCE_DIR }}\${{ env.PROGRAM }}.zip
 
 
