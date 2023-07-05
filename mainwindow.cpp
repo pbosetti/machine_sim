@@ -188,6 +188,9 @@ MainWindow::MainWindow(QWidget *parent)
   // Timed action for reading data from axes
   QTimer *plotTimer = new QTimer(this);
   connect(plotTimer, &QTimer::timeout, this, [this]() {
+    if (ui->actionKeepAspectRatio->isChecked()) {
+      ui->tracePlot->yAxis->setScaleRatio(ui->tracePlot->xAxis, 1);
+    }
     if (!_running)
       return;
     double x = _machine[AxisTag::X]->position();
@@ -283,6 +286,9 @@ void MainWindow::on_machineDataChanged() {
   qDebug() << "publish to " << _errorTopic << "and" << _positionTopic;
   ui->timePlot->yAxis->setRange(0, _machine.maxLength());
   ui->timePlot->replot();
+  ui->tracePlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
+  ui->tracePlot->yAxis->setRange(0, _machine[AxisTag::Y]->length);
+  ui->tracePlot->replot();
   syncData();
 }
 

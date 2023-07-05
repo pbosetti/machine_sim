@@ -635,10 +635,18 @@
       <item>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="2">
-         <widget class="QCustomPlot" name="tracePlot" native="true"/>
+         <widget class="QCustomPlot" name="tracePlot" native="true">
+          <property name="cursor">
+           <cursorShape>CrossCursor</cursorShape>
+          </property>
+         </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QCustomPlot" name="timePlot" native="true"/>
+         <widget class="QCustomPlot" name="timePlot" native="true">
+          <property name="cursor">
+           <cursorShape>CrossCursor</cursorShape>
+          </property>
+         </widget>
         </item>
         <item row="0" column="1">
          <spacer name="verticalSpacer">
@@ -678,6 +686,8 @@
     <property name="title">
      <string>Plot</string>
     </property>
+    <addaction name="actionKeepAspectRatio"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menu_Open_INI_file"/>
    <addaction name="menuZoom"/>
@@ -689,6 +699,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionKeepAspectRatio">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Keep aspect ratio in trace plot</string>
    </property>
   </action>
  </widget>
