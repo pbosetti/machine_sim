@@ -30,16 +30,27 @@ public:
   double max_torque = 20;
   double pitch = 0.01;
   double gravity = 0;
-  unsigned long integration_dt = 5;
+  double integration_dt = 5;
   double p = 0, i = 0, d = 0;
   double setpoint = 0.0;
 
   // Getters
   double position() { return _position; }
   quint64 previousTime() { return _previousTime; }
+  double * operator[](QString name) { return _params[name]; }
+  QList<QString> param_names() { return _params.keys(); }
 
   // Attributes
 private:
+  QMap<QString, double*> _params = {
+    {"length", &length},
+    {"friction", &friction},
+    {"mass", &mass},
+    {"maxTorque", &max_torque},
+    {"pitch", &pitch},
+    {"gravity", &gravity},
+    {"timestep", &integration_dt}
+  };
   double _position = 0;
   double _time = 0;
   QElapsedTimer *_timer;

@@ -32,6 +32,8 @@ set(PROJECT_SOURCES
 qt_add_executable(machine_sim
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    machine_params.ui
+    machine_params.h
 )
 
 # if(WIN32)

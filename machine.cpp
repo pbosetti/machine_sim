@@ -69,6 +69,7 @@ void Machine::loadIniFile(QString &path) {
     _axes[axis]->length = config[_axesNames[axis]]["length"].value_or(1.0);
     _axes[axis]->friction = config[_axesNames[axis]]["friction"].value_or(1000.0);
     _axes[axis]->mass = config[_axesNames[axis]]["mass"].value_or(150.0);
+    _axes[axis]->effective_mass = _axes[axis]->mass;
     _axes[axis]->max_torque = config[_axesNames[axis]]["max_torque"].value_or(20.0);
     _axes[axis]->pitch = config[_axesNames[axis]]["pitch"].value_or(0.01);
     _axes[axis]->gravity = config[_axesNames[axis]]["gravity"].value_or(0.0);

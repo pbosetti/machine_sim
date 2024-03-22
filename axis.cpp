@@ -13,7 +13,6 @@
 
 Axis::Axis(QObject *parent, QString name) : QThread(parent) {
   setObjectName(name);
-  qDebug() << "Created axis " << this->objectName();
   _timer = (dynamic_cast<Machine *>(parent))->timer;
   if (!_timer)
     qDebug() << "*** Casting error";
@@ -55,7 +54,7 @@ void Axis::run() {
       emit outOfLimits(objectName());
       break;
     }
-    QObject().thread()->usleep(integration_dt);
+    QObject().thread()->usleep((unsigned long)integration_dt);
   }
   qDebug() << "Stopped thread for axis " << objectName()
            << " at time " + QString::number(_timer->nsecsElapsed());

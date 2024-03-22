@@ -47,6 +47,7 @@ public:
   QList<AxisTag> *axesTags() { return &_axesTags; }
   QHash<AxisTag, char const *> *axesNames() { return &_axesNames; }
   double tq() { return _tq; }
+  QList<QString> param_names() { return _axes.values().first()->param_names(); }
 
   // Attributes
 public:

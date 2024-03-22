@@ -23,6 +23,8 @@ public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
+  Machine * machine() { return &_machine; }
+
 private:
   // Attributes
   Ui::MainWindow *ui;
@@ -69,5 +71,6 @@ private slots:
   void on_brokerDisconnected();
   void on_brokerConnected();
   void on_mqttMessage(const QByteArray &message, const QMqttTopicName &topic);
+  void on_actionSetParameters_triggered();
 };
 #endif // MAINWINDOW_H

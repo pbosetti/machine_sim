@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "machine.h"
 #include "ui_mainwindow.h"
+#include "machine_params.h"
 #include "doubleclickslider.h"
 #include <QDebug>
 #include <QDragEnterEvent>
@@ -90,6 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
   });
 
+  connect(ui->parametersButton, SIGNAL(clicked(bool)), this, SLOT(on_actionSetParameters_triggered()));
 
   // Enable signals from GUI form to machine
   toggleFormConections(On);
@@ -561,4 +563,35 @@ void MainWindow::on_outOfLimits(QString const &name) {
 
 void MainWindow::on_bangBangTimeChanged(double arg1) {
   _bangBangTimer->setInterval(arg1 * 1000);
+}
+
+
+void MainWindow::on_actionSetParameters_triggered() {
+  MachineParamsDialog dialog(this);
+  dialog.setModal(true);
+  dialog.setSizeGripEnabled(false);
+  QMap<QString, AxisTag> axesMap = {{"x", AxisTag::X}, {"y", AxisTag::Y}, {"z", AxisTag::Z}};
+
+  if (dialog.exec() == QDialog::Accepted) {
+    QMessageBox confirm(this);
+    confirm.setText("Axes timesteps are different: are you sure?");
+    confirm.setStandardButtons(QMessageBox::Yes);
+    confirm.addButton(QMessageBox::No);
+    confirm.setDefaultButton(QMessageBox::No);
+    if (dialog.valueByName("xTimestep") != dialog.valueByName("yTimestep") || dialog.valueByName("yTimestep") != dialog.valueByName("zTimestep")) {
+      if (confirm.exec() == QMessageBox::No) { goto unchanged; }
+    }
+    foreach (auto &axis, axesMap.keys()) {
+      for (auto const &p: _machine.param_names()) {
+        auto pc = p;
+        pc.front() = pc.front().toUpper();
+        *(*_machine[axesMap[axis]])[p] = dialog.valueByName(axis, pc);
+      }
+    }
+  } else {
+    goto unchanged;
+  }
+  return;
+  unchanged:
+  ui->statusbar->showMessage("Machine parameters unchanged", 5000);
 }
