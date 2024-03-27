@@ -12,10 +12,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QSettings>
 #include <stdio.h>
 
 #define SETPOINT_SLIDER_MAX 100.0f
 #define BUFLEN 1024
+
+#define PBAR_STYLE "QProgressBar {border: 1px solid grey; border-radius: 0px;text-align: center;}\n"
+#define PBAR_STYLE_OK PBAR_STYLE "QProgressBar::chunk {background: blue}"
+#define PBAR_STYLE_SAT PBAR_STYLE "QProgressBar::chunk {background: red}"
 
 //   _     _  __                      _
 //  | |   (_)/ _| ___  ___ _   _  ___| | ___
@@ -30,6 +35,27 @@ MainWindow::MainWindow(QWidget *parent)
   setLocale(QLocale("EN_en"));
   setAcceptDrops(true);
 
+  auto val = _settings.value("initialized");
+  if (!val.isNull()) {
+    _machine.read_settings(_settings);
+    ui->xpSpinBox->setValue(_machine[AxisTag::X]->p);
+    ui->xiSpinBox->setValue(_machine[AxisTag::X]->i);
+    ui->xdSpinBox->setValue(_machine[AxisTag::X]->d);
+
+    ui->ypSpinBox->setValue(_machine[AxisTag::Y]->p);
+    ui->yiSpinBox->setValue(_machine[AxisTag::Y]->i);
+    ui->ydSpinBox->setValue(_machine[AxisTag::Y]->d);
+
+    ui->zpSpinBox->setValue(_machine[AxisTag::Z]->p);
+    ui->ziSpinBox->setValue(_machine[AxisTag::Z]->i);
+    ui->zdSpinBox->setValue(_machine[AxisTag::Z]->d);
+    setupMachineAfterNewINI();
+    on_machineDataChanged();
+  } else {
+    // disable start button on load (requires loading a INI file first)
+    ui->startButton->setEnabled(false);
+    ui->startButton->setToolTip("Load an INI file first");
+  }
 
   timeZoomH.setCheckable(true);
   timeZoomV.setCheckable(true);
@@ -54,6 +80,10 @@ MainWindow::MainWindow(QWidget *parent)
   ui->menuZoom->addAction(&traceZoomV);
   timeZoomBoth.setChecked(true);
   traceZoomBoth.setChecked(true);
+
+  ui->xTorqueBar->setStyleSheet(PBAR_STYLE_OK);
+  ui->yTorqueBar->setStyleSheet(PBAR_STYLE_OK);
+  ui->zTorqueBar->setStyleSheet(PBAR_STYLE_OK);
 
   connect(&timePlotZoomGroup, SIGNAL(triggered(QAction*)), this,
           SLOT(on_actionTimeZoom(QAction*)));
@@ -93,12 +123,11 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->parametersButton, SIGNAL(clicked(bool)), this, SLOT(on_actionSetParameters_triggered()));
 
+  connect(ui->resetButton, &QPushButton::clicked, this, [=]() {_machine.reset();});
+
   // Enable signals from GUI form to machine
   toggleFormConections(On);
 
-  // disable start button on load (requires loading a INI file first)
-  ui->startButton->setEnabled(false);
-  ui->startButton->setToolTip("Load an INI file first");
 
   ui->setPointXSlider->setMaximum(SETPOINT_SLIDER_MAX);
   ui->setPointXSlider->setTickInterval(SETPOINT_SLIDER_MAX / 4.0);
@@ -198,13 +227,16 @@ MainWindow::MainWindow(QWidget *parent)
     double x = _machine[AxisTag::X]->position();
     double y = _machine[AxisTag::Y]->position();
     double z = _machine[AxisTag::Z]->position();
+    double px = _machine[AxisTag::X]->torque();
+    double py = _machine[AxisTag::Y]->torque();
+    double pz = _machine[AxisTag::Z]->torque();
     double t = _machine.lastTime() / 1.0E9;
     ui->xPositionText->display(x * 1000.0);
     ui->yPositionText->display(y * 1000.0);
     ui->zPositionText->display(z * 1000.0);
-    ui->xPositionBar->setValue(x * 1000.0);
-    ui->yPositionBar->setValue(y * 1000.0);
-    ui->zPositionBar->setValue(z * 1000.0);
+    ui->xTorqueBar->setValue(fabs(px) * 100);
+    ui->yTorqueBar->setValue(fabs(py) * 100);
+    ui->zTorqueBar->setValue(fabs(pz) * 100);
     ui->timePlot->graph(3)->addData(t, x);
     ui->timePlot->graph(4)->addData(t, y);
     ui->timePlot->graph(5)->addData(t, z);
@@ -212,6 +244,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timePlot->replot();
     _xyCurvePosition->addData(x, y);
     ui->tracePlot->replot();
+    ui->xTorqueBar->setStyleSheet(_machine[AxisTag::X]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
+    ui->yTorqueBar->setStyleSheet(_machine[AxisTag::Y]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
+    ui->zTorqueBar->setStyleSheet(_machine[AxisTag::Z]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
   });
   plotTimer->start(20);
 
@@ -246,6 +281,16 @@ MainWindow::MainWindow(QWidget *parent)
     }
   });
 
+  // connect(_machine[AxisTag::X], &Axis::saturate, this, [=](QString name, bool sat) {
+  //   if (name == "X") {
+  //     ui->xTorqueBar->setStyleSheet(sat ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
+  //   } else if (name == "Y") {
+  //     ui->yTorqueBar->setStyleSheet(sat ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
+  //   } else if (name == "Z") {
+  //     ui->zTorqueBar->setStyleSheet(sat ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
+  //   }
+  // });
+
 //  QTimer *debugTimer = new QTimer(this);
 //  connect(debugTimer, &QTimer::timeout, this, [=]() {
 //    if (!_running) return;
@@ -265,6 +310,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
   _client->disconnectFromHost();
+  _machine.save_settings(_settings);
+  _settings.setValue("initialized", true);
   delete ui;
 }
 
@@ -296,9 +343,9 @@ void MainWindow::on_machineDataChanged() {
 
 void MainWindow::syncData() {
   toggleFormConections(Off);
-  ui->xPositionBar->setMaximum(_machine[AxisTag::X]->length * 1000);
-  ui->yPositionBar->setMaximum(_machine[AxisTag::Y]->length * 1000);
-  ui->zPositionBar->setMaximum(_machine[AxisTag::Z]->length * 1000);
+  ui->xTorqueBar->setMaximum(_machine[AxisTag::X]->max_torque * 100);
+  ui->yTorqueBar->setMaximum(_machine[AxisTag::Y]->max_torque * 100);
+  ui->zTorqueBar->setMaximum(_machine[AxisTag::Z]->max_torque * 100);
 
   ui->xpSpinBox->setValue(_machine[AxisTag::X]->p);
   ui->xiSpinBox->setValue(_machine[AxisTag::X]->i);

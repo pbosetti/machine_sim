@@ -215,11 +215,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="parametersButton">
-        <property name="text">
-         <string>Parameters</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QPushButton" name="parametersButton">
+          <property name="text">
+           <string>Parameters</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="resetButton">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <spacer name="horizontalSpacer">
@@ -239,7 +250,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QGroupBox" name="groupBox">
+       <widget class="QGroupBox" name="xGroupBox">
         <property name="title">
          <string>X axis</string>
         </property>
@@ -287,8 +298,14 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="maximum">
               <double>1000000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.050000000000000</double>
              </property>
             </widget>
            </item>
@@ -339,9 +356,12 @@
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QProgressBar" name="xPositionBar">
+            <widget class="QProgressBar" name="xTorqueBar">
              <property name="enabled">
               <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Instant torque</string>
              </property>
              <property name="value">
               <number>24</number>
@@ -350,6 +370,9 @@
            </item>
            <item row="4" column="0">
             <widget class="QLCDNumber" name="xPositionText">
+             <property name="toolTip">
+              <string>Position</string>
+             </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
              </property>
@@ -370,7 +393,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_2">
+       <widget class="QGroupBox" name="yGroupBox">
         <property name="title">
          <string>Y axis</string>
         </property>
@@ -425,8 +448,14 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="maximum">
               <double>1000000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.050000000000000</double>
              </property>
             </widget>
            </item>
@@ -468,6 +497,9 @@
            </item>
            <item row="4" column="0">
             <widget class="QLCDNumber" name="yPositionText">
+             <property name="toolTip">
+              <string>Position</string>
+             </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
              </property>
@@ -483,9 +515,12 @@
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QProgressBar" name="yPositionBar">
+            <widget class="QProgressBar" name="yTorqueBar">
              <property name="enabled">
               <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Instant torque</string>
              </property>
              <property name="value">
               <number>24</number>
@@ -498,7 +533,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_3">
+       <widget class="QGroupBox" name="zGroupBox">
         <property name="title">
          <string>Z axis</string>
         </property>
@@ -553,8 +588,14 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="maximum">
               <double>1000000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.050000000000000</double>
              </property>
             </widget>
            </item>
@@ -596,6 +637,9 @@
            </item>
            <item row="4" column="0">
             <widget class="QLCDNumber" name="zPositionText">
+             <property name="toolTip">
+              <string>Position</string>
+             </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
              </property>
@@ -611,9 +655,12 @@
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QProgressBar" name="zPositionBar">
+            <widget class="QProgressBar" name="zTorqueBar">
              <property name="enabled">
               <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Instant torque</string>
              </property>
              <property name="value">
               <number>24</number>

@@ -7,6 +7,7 @@
 #include <QElapsedTimer>
 #include <QHash>
 #include <QObject>
+#include <QSettings>
 
 //typedef enum {X, Y, Z} axisTag;
 enum class AxisTag {X, Y, Z};
@@ -30,6 +31,32 @@ public:
   quint64 lastTime();
   double maxLength();
   double error();
+  void save_settings(QSettings &settings) {
+    for (auto const &a: std::as_const(_axes)) {
+      a->save_settings(settings);
+    }
+    settings.beginGroup("machine");
+    settings.setValue("brokerAddress", _brokerAddress);
+    settings.setValue("brokerPort", _brokerPort);
+    settings.setValue("pubTopic", _pubTopic);
+    settings.setValue("subTopic", _subTopic);
+    settings.endGroup();
+  }
+  void read_settings(QSettings &settings) {
+    for (auto const &a: std::as_const(_axes)) {
+      a->read_settings(settings);
+    }
+    settings.beginGroup("machine");
+    auto val = settings.value("brokerAddress");
+    if (!val.isNull()) _brokerAddress = val.toString();
+    val = settings.value("brokerPort");
+    if (!val.isNull()) _brokerPort = val.toInt();
+    val = settings.value("pubTopic");
+    if (!val.isNull()) _pubTopic = val.toString();
+    val = settings.value("subTopic");
+    if (!val.isNull()) _subTopic = val.toString();
+    settings.endGroup();
+  }
 
   // Getters
   QString *brokerAddress() { return &_brokerAddress; }
@@ -47,7 +74,7 @@ public:
   QList<AxisTag> *axesTags() { return &_axesTags; }
   QHash<AxisTag, char const *> *axesNames() { return &_axesNames; }
   double tq() { return _tq; }
-  QList<QString> param_names() { return _axes.values().first()->param_names(); }
+  QList<QString> param_names() { return _axes[AxisTag::X]->param_names(); }
 
   // Attributes
 public:

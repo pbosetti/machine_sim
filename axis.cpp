@@ -23,6 +23,33 @@ Axis::~Axis() {
   wait();
 }
 
+void Axis::save_settings(QSettings &settings) {
+  settings.beginGroup(objectName());
+  for (auto const &[k, v]: _params.asKeyValueRange()) {
+    settings.setValue(k, *v);
+  }
+  settings.setValue("p", p);
+  settings.setValue("i", i);
+  settings.setValue("d", d);
+  settings.endGroup();
+}
+
+void Axis::read_settings(QSettings &settings) {
+  settings.beginGroup(objectName());
+  auto val = settings.value("p");
+  if (!val.isNull()) p = val.toDouble();
+  val = settings.value("i");
+  if (!val.isNull()) i = val.toDouble();
+  val = settings.value("d");
+  if (!val.isNull()) d = val.toDouble();
+  for (auto const &[k, v]: _params.asKeyValueRange()) {
+    val = settings.value(k);
+    if (!val.isNull())
+      *v = val.toDouble();
+  }
+  settings.endGroup();
+}
+
 //    ___                       _   _                 
 //   / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___ 
 //  | | | | '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \/ __|
@@ -46,7 +73,7 @@ void Axis::run() {
     // PID
     pid(dt);
     // fwd dynamics (Euler's scheme)
-    f = (M_PI * _torque / pitch) - (GRAVITY * mass * pitch);
+    f = (M_PI * _torque / pitch) - (gravity * mass * pitch);
     _position += _speed * dt;
     _speed = _speed * (1 - friction / m * dt) + f * dt / m;
     // out-of-range conditions
@@ -57,7 +84,8 @@ void Axis::run() {
     QObject().thread()->usleep((unsigned long)integration_dt);
   }
   qDebug() << "Stopped thread for axis " << objectName()
-           << " at time " + QString::number(_timer->nsecsElapsed());
+           << " at time " + QString::number(_timer->nsecsElapsed())
+            << " position " + QString::number(_position);
 }
 
 void Axis::reset() {
@@ -74,6 +102,8 @@ void Axis::reset() {
 
 void Axis::pid(double dt) {
   double out, err;
+  static bool prev_sat = false;
+  bool sat = false;
   err = setpoint - _position;
   if (i)
     _errI += err * dt * 0.9;
@@ -85,4 +115,7 @@ void Axis::pid(double dt) {
     _torque = fmin(out, max_torque);
   else
     _torque = fmax(out, -max_torque);
+
+  _saturate = fabs(out) >= max_torque;
 }
+

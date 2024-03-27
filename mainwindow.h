@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QMqttClient>
+#include <QSettings>
 
 enum OnOff { On, Off };
 
@@ -40,6 +41,7 @@ private:
   QMqttTopicName _errorTopic;
   QMqttTopicName _positionTopic;
   bool _rapid = false;
+  QSettings _settings = QSettings("UniTN", "machine_sim");
 
   QActionGroup timePlotZoomGroup = QActionGroup(this);
   QAction timeZoomH = QAction("Time Zoom horizontal", this);

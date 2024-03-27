@@ -4,6 +4,7 @@
 #include "QtCore/qdebug.h"
 #include <QObject>
 #include <QThread>
+#include <QSettings>
 //#include <unistd.h>
 
 #define GRAVITY 9.81f
@@ -17,6 +18,8 @@ public:
   // Operations
   void run() override;
   void reset();
+  void save_settings(QSettings &settings);
+  void read_settings(QSettings &settings);
 
 signals:
   void outOfLimits(QString const &axis);
@@ -39,6 +42,8 @@ public:
   quint64 previousTime() { return _previousTime; }
   double * operator[](QString name) { return _params[name]; }
   QList<QString> param_names() { return _params.keys(); }
+  double torque() { return _torque; }
+  bool saturate() { return _saturate; }
 
   // Attributes
 private:
@@ -59,6 +64,7 @@ private:
   double _torque = 0;
   double _errI = 0, _errD = 0;
   double _prevError = 0;
+  bool _saturate = false;
 
   // Utilities
 private:
