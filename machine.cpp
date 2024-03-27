@@ -18,9 +18,9 @@ QDebug operator<<(QDebug dbg, Machine *m) {
       << ", Y = " << QString::number((*m)[AxisTag::Y]->effective_mass)
       << ", Z = " << QString::number((*m)[AxisTag::Z]->effective_mass) << "\n";
   dbg << " Setpoint: X = "
-      << QString::number((*m)[AxisTag::X]->setpoint)
-      << ", Y = " << QString::number((*m)[AxisTag::Y]->setpoint)
-      << ", Z = " << QString::number((*m)[AxisTag::Z]->setpoint) << "\n";
+      << QString::number((*m)[AxisTag::X]->setpoint())
+      << ", Y = " << QString::number((*m)[AxisTag::Y]->setpoint())
+      << ", Z = " << QString::number((*m)[AxisTag::Z]->setpoint()) << "\n";
   dbg << " Position: X = "
       << QString::number((*m)[AxisTag::X]->position())
       << ", Y = " << QString::number((*m)[AxisTag::Y]->position())
@@ -136,7 +136,7 @@ double Machine::maxLength() {
 
 double Machine::error() {
   return sqrt(
-      pow(_axes[AxisTag::X]->position() - _axes[AxisTag::X]->setpoint, 2) +
-      pow(_axes[AxisTag::Y]->position() - _axes[AxisTag::Y]->setpoint, 2) +
-      pow(_axes[AxisTag::Z]->position() - _axes[AxisTag::Z]->setpoint, 2));
+      pow(_axes[AxisTag::X]->position() - _axes[AxisTag::X]->setpoint(), 2) +
+      pow(_axes[AxisTag::Y]->position() - _axes[AxisTag::Y]->setpoint(), 2) +
+      pow(_axes[AxisTag::Z]->position() - _axes[AxisTag::Z]->setpoint(), 2));
 }

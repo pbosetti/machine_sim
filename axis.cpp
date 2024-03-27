@@ -89,7 +89,7 @@ void Axis::run() {
 }
 
 void Axis::reset() {
-  setpoint = length / 2.0;
+  setpoint(length / 2.0);
   _position = length / 2.0;
   _speed = 0;
   _torque = 0;
@@ -102,9 +102,7 @@ void Axis::reset() {
 
 void Axis::pid(double dt) {
   double out, err;
-  static bool prev_sat = false;
-  bool sat = false;
-  err = setpoint - _position;
+  err = _setpoint - _position;
   if (i)
     _errI += err * dt * 0.9;
   if (d && dt > 0)

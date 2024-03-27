@@ -253,19 +253,19 @@ MainWindow::MainWindow(QWidget *parent)
   connect(_bangBangTimer, &QTimer::timeout, this, [this]() {
     static int level = +1;
     if (ui->bangBangX->isChecked()) {
-      _machine[AxisTag::X]->setpoint =
+      _machine[AxisTag::X]->setpoint(
           (0.5 + level * ui->bangBangLevel->value()) *
-          _machine[AxisTag::X]->length;
+          _machine[AxisTag::X]->length);
     }
     if (ui->bangBangY->isChecked()) {
-      _machine[AxisTag::Y]->setpoint =
+      _machine[AxisTag::Y]->setpoint(
           (0.5 + level * ui->bangBangLevel->value()) *
-          _machine[AxisTag::Y]->length;
+          _machine[AxisTag::Y]->length);
     }
     if (ui->bangBangZ->isChecked()) {
-      _machine[AxisTag::Z]->setpoint =
+      _machine[AxisTag::Z]->setpoint(
           (0.5 + level * ui->bangBangLevel->value()) *
-          _machine[AxisTag::Z]->length;
+          _machine[AxisTag::Z]->length);
     }
     level *= -1;
   });
@@ -493,15 +493,15 @@ void MainWindow::on_formDataChanged() {
   _machine[AxisTag::Z]->i = ui->ziSpinBox->value();
   _machine[AxisTag::Z]->d = ui->zdSpinBox->value();
 
-  _machine[AxisTag::X]->setpoint = ui->setPointXSlider->value() /
+  _machine[AxisTag::X]->setpoint(ui->setPointXSlider->value() /
                                    SETPOINT_SLIDER_MAX *
-                                   _machine[AxisTag::X]->length;
-  _machine[AxisTag::Y]->setpoint = ui->setPointYSlider->value() /
+                                  _machine[AxisTag::X]->length);
+  _machine[AxisTag::Y]->setpoint(ui->setPointYSlider->value() /
                                    SETPOINT_SLIDER_MAX *
-                                   _machine[AxisTag::Y]->length;
-  _machine[AxisTag::Z]->setpoint = ui->setPointZSlider->value() /
-                                   SETPOINT_SLIDER_MAX *
-                                   _machine[AxisTag::Z]->length;
+                                  _machine[AxisTag::Y]->length);
+  _machine[AxisTag::Z]->setpoint(ui->setPointZSlider->value() /
+                                  SETPOINT_SLIDER_MAX *
+                                  _machine[AxisTag::Z]->length);
 }
 
 void MainWindow::on_action_Open_INI_file_triggered() {
@@ -584,9 +584,9 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
     double z = obj["z"].toDouble() / 1000.0;
     int rapid = obj["rapid"].toInt();
     _rapid = (1 == rapid);
-    _machine[AxisTag::X]->setpoint = x;
-    _machine[AxisTag::Y]->setpoint = y;
-    _machine[AxisTag::Z]->setpoint = z;
+    _machine[AxisTag::X]->setpoint(x);
+    _machine[AxisTag::Y]->setpoint(y);
+    _machine[AxisTag::Z]->setpoint(z);
     ui->timePlot->graph(0)->addData(t, x);
     ui->timePlot->graph(1)->addData(t, y);
     ui->timePlot->graph(2)->addData(t, z);

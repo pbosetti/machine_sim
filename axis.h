@@ -35,7 +35,6 @@ public:
   double gravity = 0;
   double integration_dt = 5;
   double p = 0, i = 0, d = 0;
-  double setpoint = 0.0;
 
   // Getters
   double position() { return _position; }
@@ -44,6 +43,8 @@ public:
   QList<QString> param_names() { return _params.keys(); }
   double torque() { return _torque; }
   bool saturate() { return _saturate; }
+  void setpoint(double val) { _setpoint = val; _errI = 0; }
+  double setpoint() { return _setpoint; }
 
   // Attributes
 private:
@@ -56,6 +57,7 @@ private:
     {"gravity", &gravity},
     {"timestep", &integration_dt}
   };
+  double _setpoint = 0.0;
   double _position = 0;
   double _time = 0;
   QElapsedTimer *_timer;
