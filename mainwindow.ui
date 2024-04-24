@@ -677,14 +677,31 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QPushButton" name="startButton">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QPushButton" name="startButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Start</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="logButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Select log destination</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <layout class="QGridLayout" name="gridLayout">
@@ -735,6 +752,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_Open_INI_file"/>
+    <addaction name="action_select_log_destination"/>
    </widget>
    <widget class="QMenu" name="menuZoom">
     <property name="title">
@@ -773,6 +791,11 @@
   <action name="actionSetParameters">
    <property name="text">
     <string>Set parameters...</string>
+   </property>
+  </action>
+  <action name="action_select_log_destination">
+   <property name="text">
+    <string>Select log destination...</string>
    </property>
   </action>
  </widget>

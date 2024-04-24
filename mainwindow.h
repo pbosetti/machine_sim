@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QMqttClient>
 #include <QSettings>
+#include <QDir>
 
 enum OnOff { On, Off };
 
@@ -52,6 +53,12 @@ private:
   QAction traceZoomV = QAction("Trace Zoom vertical", this);
   QAction traceZoomBoth = QAction("Trace Zoom both", this);
 
+  QString _logFileBaseName = "";
+  uint16_t _logNumber = 0;
+  QFile _logFile;
+
+  QString logFilename();
+
   // Events
   void dragEnterEvent(QDragEnterEvent *e);
   void dropEvent(QDropEvent *);
@@ -63,6 +70,8 @@ private:
   // Slots
 private slots:
   void on_action_Open_INI_file_triggered();
+  void on_action_select_log_destination_triggered();
+  void logButton_triggered(bool checked);
   void on_actionTimeZoom(QAction *action);
   void on_machineDataChanged();
   void on_startButtonClicked();

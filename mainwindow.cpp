@@ -13,7 +13,6 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QSettings>
-#include <stdio.h>
 
 #define SETPOINT_SLIDER_MAX 100.0f
 #define BUFLEN 1024
@@ -281,6 +280,8 @@ MainWindow::MainWindow(QWidget *parent)
     }
   });
 
+  connect(ui->logButton, &QPushButton::clicked, this, &MainWindow::logButton_triggered);
+
   // connect(_machine[AxisTag::X], &Axis::saturate, this, [=](QString name, bool sat) {
   //   if (name == "X") {
   //     ui->xTorqueBar->setStyleSheet(sat ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
@@ -457,6 +458,17 @@ void MainWindow::dropEvent(QDropEvent *e) {
   setupMachineAfterNewINI();
 }
 
+
+QString MainWindow::logFilename() {
+  QFileInfo info(_logFileBaseName);
+  QString dir = info.absolutePath() + "/";
+  QString name = info.completeBaseName() + "_";
+  QString suffix = info.suffix();
+  QString n = QString::number(_logNumber);
+  return dir + name + n + "." + suffix;
+}
+
+
 //   ____  _       _
 //  / ___|| | ___ | |_ ___
 //  \___ \| |/ _ \| __/ __|
@@ -511,6 +523,39 @@ void MainWindow::on_action_Open_INI_file_triggered() {
     return;
   _machine.loadIniFile(fileName);
   setupMachineAfterNewINI();
+}
+
+
+void MainWindow::on_action_select_log_destination_triggered() {
+  QString fileName =
+      QFileDialog::getSaveFileName(this, "Select log directory and base file name", QDir::homePath(), "Text files (*.txt *.log)");
+  if (fileName.isNull()) {
+    return;
+  }
+  _logNumber = 0;
+  _logFileBaseName = fileName;
+  ui->logButton->setEnabled(true);
+  ui->statusbar->showMessage(QString("Logging starts to file ") + logFilename(), 5000);
+}
+
+void MainWindow::logButton_triggered(bool checked) {
+  if (checked) {
+    if (ui->logButton->text() != "Start logging") {
+      on_action_select_log_destination_triggered();
+      if (_logFileBaseName.isEmpty()) {
+        ui->logButton->setChecked(false);
+        return;
+      }
+    }
+    _logFile.setFileName(logFilename());
+    _logFile.open(QIODeviceBase::WriteOnly);
+    _logFile.write("t rapid xc yc zc xp yp zp\n");
+    ui->logButton->setText("Stop logging");
+  } else {
+    _logFile.close();
+    _logNumber++;
+    ui->logButton->setText("Start logging");
+  }
 }
 
 // Start/stop simulation
@@ -592,6 +637,13 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
     ui->timePlot->graph(2)->addData(t, z);
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
     (rapid ? _xyCurveRapid : _xyCurveInterp)->addData(x, y);
+    if (_logFile.isOpen()) {
+      double px = _machine[AxisTag::X]->position();
+      double py = _machine[AxisTag::Y]->position();
+      double pz = _machine[AxisTag::Z]->position();
+      QString line = QString::asprintf("%.3f %d %.3f %.3f %.3f %.3f %.3f %.3f\n", t, rapid, x, y, z, px, py, pz);
+      _logFile.write(line.toStdString().c_str());
+    }
   } else if (topic.name().endsWith(QString("position"))) {
 
   }
