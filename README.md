@@ -6,6 +6,18 @@ It is written in QT 6.5.1. If you have Qt installed, you can clone and build it 
 
 For Windows users, you can download a pre-built binary in the [latest releases section](https://github.com/pbosetti/machine_sim/releases).
 
+For Mac users, proceed as follows:
+
+```bash
+brew install qt6
+git clone https://github.com/pbosetti/machine_sim.git
+cd machine_sim
+cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+then launch the `machine_sim.app` bundle in the `build` folder.
+
 
 ## Usage
 
