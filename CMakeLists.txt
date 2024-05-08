@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
-
-project(machine_sim VERSION 0.1 LANGUAGES CXX)
+set(VERSION "0.6.1")
+project(machine_sim VERSION ${VERSION} LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Mqtt PrintSupport)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Mqtt PrintSupport)
+
+configure_file(${CMAKE_CURRENT_LIST_DIR}/constants.h.in ${CMAKE_CURRENT_LIST_DIR}/constants.h)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -26,11 +28,12 @@ set(PROJECT_SOURCES
         qcustomplot.h
         qcustomplot.cpp
         machine_params.h
+        constants.h
         toml.hpp
 )
 
 if(WIN32)
-    set(app_icon "${CMAKE_CURRENT_LIST_DIR}/resources/icon_win.ico")
+    set(app_icon "${CMAKE_CURRENT_LIST_DIR}/resources/resources.rc")
 else()
     set(MACOSX_BUNDLE_ICON_FILE icon_mac.icns)
     set(app_icon "${CMAKE_CURRENT_LIST_DIR}/resources/icon_mac.icns")

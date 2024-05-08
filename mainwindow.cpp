@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 #include "machine_params.h"
 #include "doubleclickslider.h"
+#include "constants.h"
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
@@ -55,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->startButton->setEnabled(false);
     ui->startButton->setToolTip("Load an INI file first");
   }
+  this->setWindowTitle(QString("C-CNC Machine Simulator, v") + VERSION);
 
   timeZoomH.setCheckable(true);
   timeZoomV.setCheckable(true);
