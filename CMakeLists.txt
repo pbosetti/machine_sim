@@ -25,15 +25,24 @@ set(PROJECT_SOURCES
         machine.cpp
         qcustomplot.h
         qcustomplot.cpp
+        machine_params.h
         toml.hpp
 )
 
+if(WIN32)
+    set(app_icon "${CMAKE_CURRENT_LIST_DIR}/resources/icon_win.ico")
+else()
+    set(MACOSX_BUNDLE_ICON_FILE icon_mac.icns)
+    set(app_icon "${CMAKE_CURRENT_LIST_DIR}/resources/icon_mac.icns")
+    set_source_files_properties(${app_icon} PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 qt_add_executable(machine_sim
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
     machine_params.ui
-    machine_params.h
+    ${app_icon}
 )
 
 # if(WIN32)
