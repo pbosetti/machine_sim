@@ -18,6 +18,38 @@ cmake --build build
 
 then launch the `machine_sim.app` bundle in the `build` folder.
 
+For Linux users (Ubuntu 22.04), proceed as follows:
+
+```bash
+cd ~
+export QTV=6.5.1
+sudo apt install python3 python3-pip libgl1-mesa-dev
+pip install -U pip
+pip install aqtinstall
+export PATH=$PATH:$HOME/.local/bin
+aqt install-qt linux desktop ${QTV} -m all -O QT
+cd ~/Devel
+git clone https://github.com/qt/qtmqtt.git
+cd qtmqtt
+git checkout v${QTV}
+export QT6_INSTALL=${HOME}/QT/${QTV}/gcc_64
+export Qt6_DIR=${QT6_INSTALL}/lib/cmake/Qt6
+cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${QT6_INSTALL}
+cmake --build build -j4
+cmake --install build
+cd ~/Devel
+git clone https://github.com/pbosetti/machine_sim.git
+cd machine_sim
+export Qt6CoreTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6CoreTools
+export Qt6WidgetsTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6WidgetsTools
+export Qt6Widgets_DIR=${QT6_INSTALL}/lib/cmake/Qt6Widgets
+export Qt6GuiTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6GuiTools
+QT_DIR=$Qt6_DIR cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+```
+
+The executable will be in the `build` folder.
+
 
 ## Usage
 
