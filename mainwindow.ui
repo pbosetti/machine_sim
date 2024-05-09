@@ -370,6 +370,10 @@
              <property name="toolTip">
               <string>Position</string>
              </property>
+             <property name="styleSheet">
+              <string notr="true">/* background-color: rgb(255, 200, 200); */
+color: rgb(200,0,0); </string>
+             </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
              </property>
@@ -496,6 +500,10 @@
             <widget class="QLCDNumber" name="yPositionText">
              <property name="toolTip">
               <string>Position</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">/* background-color: rgb(200, 255, 200) */
+color: rgb(0, 150, 0)</string>
              </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
@@ -636,6 +644,10 @@
             <widget class="QLCDNumber" name="zPositionText">
              <property name="toolTip">
               <string>Position</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">/* background-color: rgb(200, 200, 255); */
+color: rgb(0, 0, 255)</string>
              </property>
              <property name="frameShape">
               <enum>QFrame::NoFrame</enum>
