@@ -51,10 +51,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->zdSpinBox->setValue(_machine[AxisTag::Z]->d);
     setupMachineAfterNewINI();
     on_machineDataChanged();
-  } else {
-    // disable start button on load (requires loading a INI file first)
-    ui->startButton->setEnabled(false);
-    ui->startButton->setToolTip("Load an INI file first");
   }
   this->setWindowTitle(QString("C-CNC Machine Simulator, v") + VERSION);
 
