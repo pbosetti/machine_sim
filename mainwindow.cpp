@@ -620,13 +620,19 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
                                 const QMqttTopicName &topic) {
   if (topic.name().endsWith(QString("setpoint"))) {
     double t = _machine.lastTime() / 1.0E9;
+    double x = _machine[AxisTag::X]->setpoint();
+    double y = _machine[AxisTag::Y]->setpoint();
+    double z = _machine[AxisTag::Z]->setpoint();
     QJsonDocument doc = QJsonDocument::fromJson(message);
     QJsonObject obj = doc.object();
-    double x = obj["x"].toDouble() / 1000.0;
-    double y = obj["y"].toDouble() / 1000.0;
-    double z = obj["z"].toDouble() / 1000.0;
-    int rapid = obj["rapid"].toInt();
-    _rapid = (1 == rapid);
+    if(!obj["x"].isNull())
+      x = obj["x"].toDouble() / 1000.0;
+    if(!obj["y"].isNull())
+      y = obj["y"].toDouble() / 1000.0;
+    if(!obj["z"].isNull())
+      z = obj["z"].toDouble() / 1000.0;
+    if(!obj["rapid"].isNull())
+      _rapid = (obj["rapid"].toInt() == 1);
     _machine[AxisTag::X]->setpoint(x);
     _machine[AxisTag::Y]->setpoint(y);
     _machine[AxisTag::Z]->setpoint(z);
@@ -634,12 +640,12 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
     ui->timePlot->graph(1)->addData(t, y);
     ui->timePlot->graph(2)->addData(t, z);
     ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
-    (rapid ? _xyCurveRapid : _xyCurveInterp)->addData(x, y);
+    (_rapid ? _xyCurveRapid : _xyCurveInterp)->addData(x, y);
     if (_logFile.isOpen()) {
       double px = _machine[AxisTag::X]->position();
       double py = _machine[AxisTag::Y]->position();
       double pz = _machine[AxisTag::Z]->position();
-      QString line = QString::asprintf("%.3f %d %.3f %.3f %.3f %.3f %.3f %.3f\n", t, rapid, x, y, z, px, py, pz);
+      QString line = QString::asprintf("%.3f %d %.3f %.3f %.3f %.3f %.3f %.3f\n", t, _rapid, x, y, z, px, py, pz);
       _logFile.write(line.toStdString().c_str());
     }
   } else if (topic.name().endsWith(QString("position"))) {

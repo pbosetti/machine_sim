@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(VERSION "0.3.3")
+set(VERSION "0.3.4")
 project(machine_sim VERSION ${VERSION} LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
