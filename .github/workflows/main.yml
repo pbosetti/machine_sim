@@ -101,7 +101,7 @@ jobs:
           tag_name: ${{ github.ref }}
           name: Latest binary release
           body: Latest binary release for Windows, built on ${{ github.event.repository.updated_at}}
-          files: machine_sim.zip
+          files: ${{ env.PROGRAM }}_${{ github.ref_name }}.zip
 
 
 
