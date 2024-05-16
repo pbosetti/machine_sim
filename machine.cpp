@@ -61,8 +61,8 @@ void Machine::loadIniFile(QString &path) {
   auto config = toml::parse_file(path.toStdString());
   _brokerAddress = config["MQTT"]["broker_address"].value_or("localhost");
   _brokerPort = config["MQTT"]["broker_port"].value_or(1883);
-  _subTopic = config["MQTT"]["pub_topic"].value_or("c-cnc/#");
-  _pubTopic = config["MQTT"]["sub_topic"].value_or("c-cnc/#");
+  _subTopic = config["MQTT"]["pub_topic"].value_or("ccnc/#");
+  _pubTopic = config["MQTT"]["sub_topic"].value_or("ccnc/#");
   _tq = config["C-CNC"]["tq"].value_or(0.005);
 
   for (AxisTag axis : _axesTags) {
