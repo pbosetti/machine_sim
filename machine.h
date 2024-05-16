@@ -41,6 +41,7 @@ public:
     settings.setValue("pubTopic", _pubTopic);
     settings.setValue("subTopic", _subTopic);
     settings.endGroup();
+    qDebug() << _brokerAddress << ":" << _brokerPort << ", " << _pubTopic << ", " << _subTopic;
   }
   void read_settings(QSettings &settings) {
     for (auto const &a: std::as_const(_axes)) {
@@ -56,6 +57,7 @@ public:
     val = settings.value("subTopic");
     if (!val.isNull()) _subTopic = val.toString();
     settings.endGroup();
+    qDebug() << _brokerAddress << ":" << _brokerPort << ", " << _pubTopic << ", " << _subTopic;
   }
 
   // Getters
@@ -75,6 +77,12 @@ public:
   QHash<AxisTag, char const *> *axesNames() { return &_axesNames; }
   double tq() { return _tq; }
   QList<QString> param_names() { return _axes[AxisTag::X]->param_names(); }
+
+  // Setters
+  void setBrokerAddress(QString addr) { _brokerAddress = addr; }
+  void setBrokerPort(quint16 port) { _brokerPort = port; }
+  void setPubTopic(QString s) { _pubTopic = s; }
+  void setSubTopic(QString s) { _subTopic = s; }
 
   // Attributes
 public:

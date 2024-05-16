@@ -36,7 +36,12 @@ MainWindow::MainWindow(QWidget *parent)
   setAcceptDrops(true);
 
   auto val = _settings.value("initialized");
+  _settings.beginGroup("machine");
+  qDebug() << "pub: " << _settings.value("pubTopic");
+  _settings.endGroup();
+
   if (!val.isNull()) {
+    qDebug() << "Initialized";
     _machine.read_settings(_settings);
     ui->xpSpinBox->setValue(_machine[AxisTag::X]->p);
     ui->xiSpinBox->setValue(_machine[AxisTag::X]->i);
@@ -309,8 +314,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
   _client->disconnectFromHost();
-  _machine.save_settings(_settings);
   _settings.setValue("initialized", true);
+  _machine.setBrokerAddress(ui->brokerAddressField->text());
+  _machine.setBrokerPort(ui->brokerPortField->value());
+  _machine.setPubTopic(ui->pubTopicField->text());
+  _machine.setSubTopic(ui->subTopicField->text());
+  _machine.save_settings(_settings);
+  qDebug() << "Settings status: " << _settings.status();
   delete ui;
 }
 
