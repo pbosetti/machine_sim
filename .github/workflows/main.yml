@@ -81,7 +81,7 @@ jobs:
               copy C:\Windows\System32\msvcp140.dll .
               copy C:\Windows\System32\vcruntime140.dll .
               cd ${{ env.SOURCE_DIR }}\deploy
-              7z a ..\${{ env.PROGRAM }}.zip ${{ env.PROGRAM }}\*
+              7z a ..\${{ env.PROGRAM }}_${{ github.ref_name }}.zip ${{ env.PROGRAM }}\*
 
       # - name: (9) List contents
       #   run: |
