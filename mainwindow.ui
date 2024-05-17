@@ -326,42 +326,10 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="DoubleClickSlider" name="setPointXSlider">
-             <property name="maximum">
-              <number>100</number>
-             </property>
-             <property name="sliderPosition">
-              <number>0</number>
-             </property>
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="tickPosition">
-              <enum>QSlider::TicksBelow</enum>
-             </property>
-             <property name="tickInterval">
-              <number>333</number>
-             </property>
-            </widget>
-           </item>
            <item row="3" column="0">
             <widget class="QLabel" name="label_14">
              <property name="text">
               <string>Set point</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QProgressBar" name="xTorqueBar">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="toolTip">
-              <string>Instant torque</string>
-             </property>
-             <property name="value">
-              <number>24</number>
              </property>
             </widget>
            </item>
@@ -385,6 +353,41 @@ color: rgb(200,0,0); </string>
              </property>
              <property name="segmentStyle">
               <enum>QLCDNumber::Flat</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QProgressBar" name="xTorqueBar">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="toolTip">
+              <string>Instant torque</string>
+             </property>
+             <property name="value">
+              <number>24</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="DoubleClickSlider" name="setPointXSlider">
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>50</number>
+             </property>
+             <property name="sliderPosition">
+              <number>50</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="tickPosition">
+              <enum>QSlider::TicksBelow</enum>
+             </property>
+             <property name="tickInterval">
+              <number>333</number>
              </property>
             </widget>
            </item>
@@ -477,6 +480,9 @@ color: rgb(200,0,0); </string>
             <widget class="DoubleClickSlider" name="setPointYSlider">
              <property name="maximum">
               <number>100</number>
+             </property>
+             <property name="value">
+              <number>50</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -622,6 +628,9 @@ color: rgb(0, 150, 0)</string>
              <property name="maximum">
               <number>100</number>
              </property>
+             <property name="value">
+              <number>50</number>
+             </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -753,7 +762,7 @@ color: rgb(0, 0, 255)</string>
      <x>0</x>
      <y>0</y>
      <width>872</width>
-     <height>24</height>
+     <height>43</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Open_INI_file">

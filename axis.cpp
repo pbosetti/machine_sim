@@ -50,6 +50,16 @@ void Axis::read_settings(QSettings &settings) {
   settings.endGroup();
 }
 
+QString Axis::info() {
+  QString desc;
+  for (auto const &[k,v]: _params.asKeyValueRange()) {
+    desc += QString{"%1: %2\n"}.arg(k).arg(*v);
+  }
+  return desc;
+}
+
+
+
 //    ___                       _   _                 
 //   / _ \ _ __   ___ _ __ __ _| |_(_) ___  _ __  ___ 
 //  | | | | '_ \ / _ \ '__/ _` | __| |/ _ \| '_ \/ __|

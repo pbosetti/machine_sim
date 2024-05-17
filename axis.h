@@ -20,6 +20,7 @@ public:
   void reset();
   void save_settings(QSettings &settings);
   void read_settings(QSettings &settings);
+  QString info();
 
 signals:
   void outOfLimits(QString const &axis);
@@ -55,7 +56,7 @@ private:
     {"maxTorque", &max_torque},
     {"pitch", &pitch},
     {"gravity", &gravity},
-    {"timestep", &integration_dt}
+    {"timestep", &integration_dt},
   };
   double _setpoint = 0.0;
   double _position = 0;

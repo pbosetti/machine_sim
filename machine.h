@@ -41,7 +41,6 @@ public:
     settings.setValue("pubTopic", _pubTopic);
     settings.setValue("subTopic", _subTopic);
     settings.endGroup();
-    qDebug() << _brokerAddress << ":" << _brokerPort << ", " << _pubTopic << ", " << _subTopic;
   }
   void read_settings(QSettings &settings) {
     for (auto const &a: std::as_const(_axes)) {
@@ -57,7 +56,8 @@ public:
     val = settings.value("subTopic");
     if (!val.isNull()) _subTopic = val.toString();
     settings.endGroup();
-    qDebug() << _brokerAddress << ":" << _brokerPort << ", " << _pubTopic << ", " << _subTopic;
+    link_axes({AxisTag::Z, AxisTag::Y, AxisTag::X});
+    emit dataHasChanged();
   }
 
   // Getters
@@ -95,13 +95,13 @@ private:
   QList<AxisTag> _axesTags;
   QHash<AxisTag, char const *> _axesNames;
   QHash<AxisTag, Axis *> _axes;
-  double _tq;
+  double _tq = 0.005;
 
   // Signals
 signals:
   void dataHasChanged();
 };
 
-QDebug operator<<(QDebug dbg, Machine &m);
+QDebug operator<<(QDebug dbg, Machine *m);
 
 #endif // MACHINE_H

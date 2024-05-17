@@ -36,12 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
   setAcceptDrops(true);
 
   auto val = _settings.value("initialized");
-  _settings.beginGroup("machine");
-  qDebug() << "pub: " << _settings.value("pubTopic");
-  _settings.endGroup();
 
   if (!val.isNull()) {
-    qDebug() << "Initialized";
     _machine.read_settings(_settings);
     ui->xpSpinBox->setValue(_machine[AxisTag::X]->p);
     ui->xiSpinBox->setValue(_machine[AxisTag::X]->i);
@@ -55,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->ziSpinBox->setValue(_machine[AxisTag::Z]->i);
     ui->zdSpinBox->setValue(_machine[AxisTag::Z]->d);
     setupMachineAfterNewINI();
+    on_formDataChanged();
     on_machineDataChanged();
   }
   this->setWindowTitle(QString("C-CNC Machine Simulator, v") + VERSION);
@@ -320,7 +317,6 @@ MainWindow::~MainWindow() {
   _machine.setPubTopic(ui->pubTopicField->text());
   _machine.setSubTopic(ui->subTopicField->text());
   _machine.save_settings(_settings);
-  qDebug() << "Settings status: " << _settings.status();
   delete ui;
 }
 
@@ -341,7 +337,6 @@ void MainWindow::on_machineDataChanged() {
   publishBasePath.removeLast();
   _errorTopic = publishBasePath + "error";
   _positionTopic = publishBasePath + "position";
-  qDebug() << "publish to " << _errorTopic << "and" << _positionTopic;
   ui->timePlot->yAxis->setRange(0, _machine.maxLength());
   ui->timePlot->replot();
   ui->tracePlot->xAxis->setRange(0, _machine[AxisTag::X]->length);
@@ -420,9 +415,9 @@ void MainWindow::toggleFormConections(enum OnOff state) {
 }
 
 void MainWindow::setupMachineAfterNewINI() {
-  ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
-  ui->setPointYSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
-  ui->setPointZSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  // ui->setPointXSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  // ui->setPointYSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
+  // ui->setPointZSlider->setValue(SETPOINT_SLIDER_MAX / 2.0);
   ui->startButton->setEnabled(true);
   ui->startButton->setToolTip("Start simulation");
   ui->connectButton->setEnabled(true);

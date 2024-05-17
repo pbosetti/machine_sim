@@ -8,7 +8,7 @@
 
 QDebug operator<<(QDebug dbg, Machine *m) {
   QDebugStateSaver saver(dbg);
-  dbg.nospace().noquote() << " Broker: "
+  dbg.nospace().noquote() << "Broker: "
                 << *m->brokerAddress() + ":" + QString::number(m->brokerPort())
                 << "\n";
   dbg << " Publish on " << *m->pubTopic() << " - Subscribe to " << *m->subTopic()
@@ -80,7 +80,6 @@ void Machine::loadIniFile(QString &path) {
     _axes[axis]->d = config[_axesNames[axis]]["d"].value_or(0.0);
   }
   link_axes({AxisTag::Z, AxisTag::Y, AxisTag::X});
-  qDebug() << "Machine:\n" << this;
   emit dataHasChanged();
 }
 
