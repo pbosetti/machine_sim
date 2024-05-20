@@ -8,6 +8,7 @@
 #include <QMqttClient>
 #include <QSettings>
 #include <QDir>
+#include <QtCharts/QtCharts>
 
 enum OnOff { On, Off };
 
@@ -56,6 +57,11 @@ private:
   QString _logFileBaseName = "";
   uint16_t _logNumber = 0;
   QFile _logFile;
+  QBarSet *_pidSetP = new QBarSet("P");
+  QBarSet *_pidSetI = new QBarSet("I");
+  QBarSet *_pidSetD = new QBarSet("D");
+  QStackedBarSeries *_barSeries = new QStackedBarSeries;
+
 
   QString logFilename();
 

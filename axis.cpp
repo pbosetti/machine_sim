@@ -110,11 +110,20 @@ void Axis::reset() {
 }
 
 
+QList<double> Axis::pidValues() {
+  QList<double> v;
+  v.append(p * (_setpoint - _position));
+  v.append(i * _errI);
+  v.append(d * _errD);
+  return v;
+}
+
+
 void Axis::pid(double dt) {
   double out, err;
   err = _setpoint - _position;
   if (i)
-    _errI += err * dt * 0.9;
+    _errI += err * dt;
   if (d && dt > 0)
     _errD = (err - _prevError) / dt;
   _prevError = err;

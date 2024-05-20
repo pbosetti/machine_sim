@@ -46,6 +46,7 @@ public:
   bool saturate() { return _saturate; }
   void setpoint(double val) { _setpoint = val; _errI = 0; }
   double setpoint() { return _setpoint; }
+  QList<double> pidValues();
 
   // Attributes
 private:

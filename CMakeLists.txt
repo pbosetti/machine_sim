@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(VERSION "0.3.6")
+set(VERSION "0.3.7")
 project(machine_sim VERSION ${VERSION} LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -10,8 +10,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR on)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Mqtt PrintSupport)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Mqtt PrintSupport)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Mqtt PrintSupport Charts)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Mqtt PrintSupport Charts)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/constants.h.in ${CMAKE_CURRENT_LIST_DIR}/constants.h)
 
@@ -55,6 +55,7 @@ qt_add_executable(machine_sim
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Mqtt)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::PrintSupport)
+target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Charts)
 
 set_target_properties(machine_sim PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

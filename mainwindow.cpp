@@ -14,6 +14,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QSettings>
+#include <QBarSet>
 
 #define SETPOINT_SLIDER_MAX 100.0f
 #define BUFLEN 1024
@@ -246,6 +247,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->xTorqueBar->setStyleSheet(_machine[AxisTag::X]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
     ui->yTorqueBar->setStyleSheet(_machine[AxisTag::Y]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
     ui->zTorqueBar->setStyleSheet(_machine[AxisTag::Z]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
+    auto pidValues = _machine[AxisTag::X]->pidValues();
+    qDebug() << pidValues;
+    _pidSetP->replace(0, fabs(pidValues[0]));
+    _pidSetI->replace(0, fabs(pidValues[1]));
+    _pidSetD->replace(0, fabs(pidValues[2]));
+    pidValues = _machine[AxisTag::Y]->pidValues();
+    _pidSetP->replace(1, fabs(pidValues[0]));
+    _pidSetI->replace(1, fabs(pidValues[1]));
+    _pidSetD->replace(1, fabs(pidValues[2]));
+    pidValues = _machine[AxisTag::Z]->pidValues();
+    _pidSetP->replace(2, fabs(pidValues[0]));
+    _pidSetI->replace(2, fabs(pidValues[1]));
+    _pidSetD->replace(2, fabs(pidValues[2]));
   });
   plotTimer->start(20);
 
@@ -307,6 +321,24 @@ MainWindow::MainWindow(QWidget *parent)
 //        ", v: " << s;
 //  });
 //  debugTimer->start(250);
+  double maxX = _machine[AxisTag::X]->max_torque / 3.0;
+  double maxY = _machine[AxisTag::Y]->max_torque / 3.0;
+  double maxZ = _machine[AxisTag::Z]->max_torque / 3.0;
+  *_pidSetP << maxX << maxY << maxZ;
+  *_pidSetI << maxX << maxY << maxZ;
+  *_pidSetD << maxX << maxY << maxZ;
+  _barSeries->append(_pidSetP);
+  _barSeries->append(_pidSetI);
+  _barSeries->append(_pidSetD);
+  ui->barChart->chart()->addSeries(_barSeries);
+  QStringList categories {"X", "Y", "Z"};
+  auto axisX = new QBarCategoryAxis;
+  axisX->append(categories);
+  ui->barChart->chart()->addAxis(axisX, Qt::AlignBottom);
+  _barSeries->attachAxis(axisX);
+  ui->barChart->chart()->setTitle("Instant torque");
+  ui->barChart->chart()->legend()->setAlignment(Qt::AlignRight);
+  ui->barChart->chart()->setMargins(QMargins(5,0,0,0));
 }
 
 MainWindow::~MainWindow() {

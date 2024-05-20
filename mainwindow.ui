@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>872</width>
+    <width>966</width>
     <height>825</height>
    </rect>
   </property>
@@ -245,7 +245,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="ctrlPanelsLayout">
       <item>
        <widget class="QGroupBox" name="xGroupBox">
         <property name="title">
@@ -690,6 +690,22 @@ color: rgb(0, 0, 255)</string>
         </layout>
        </widget>
       </item>
+      <item>
+       <widget class="QChartView" name="barChart" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>180</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -761,8 +777,8 @@ color: rgb(0, 0, 255)</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>872</width>
-     <height>43</height>
+     <width>966</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Open_INI_file">
@@ -828,6 +844,12 @@ color: rgb(0, 0, 255)</string>
    <class>DoubleClickSlider</class>
    <extends>QSlider</extends>
    <header>doubleclickslider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QWidget</extends>
+   <header location="global">QtCharts/QtCharts</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
