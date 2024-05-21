@@ -248,7 +248,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->yTorqueBar->setStyleSheet(_machine[AxisTag::Y]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
     ui->zTorqueBar->setStyleSheet(_machine[AxisTag::Z]->saturate() ? PBAR_STYLE_SAT : PBAR_STYLE_OK);
     auto pidValues = _machine[AxisTag::X]->pidValues();
-    qDebug() << pidValues;
     _pidSetP->replace(0, fabs(pidValues[0]));
     _pidSetI->replace(0, fabs(pidValues[1]));
     _pidSetD->replace(0, fabs(pidValues[2]));
