@@ -36,6 +36,7 @@ public:
   double gravity = 0;
   double integration_dt = 5;
   double p = 0, i = 0, d = 0;
+  double rt_pacing = 1.0;
 
   // Getters
   double position() { return _position; }

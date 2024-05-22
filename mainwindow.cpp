@@ -125,6 +125,12 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->resetButton, &QPushButton::clicked, this, [=]() {_machine.reset();});
 
+  connect(ui->rtPacing, &QDoubleSpinBox::valueChanged, this, [=](double v) {
+    _machine[AxisTag::X]->rt_pacing = v;
+    _machine[AxisTag::Y]->rt_pacing = v;
+    _machine[AxisTag::Z]->rt_pacing = v;
+  });
+
   // Enable signals from GUI form to machine
   toggleFormConections(On);
 
@@ -655,7 +661,7 @@ void MainWindow::on_brokerDisconnected() {
 void MainWindow::on_mqttMessage(const QByteArray &message,
                                 const QMqttTopicName &topic) {
   if (topic.name().endsWith(QString("setpoint"))) {
-    double t = _machine.lastTime() / 1.0E9;
+    double t = _machine.lastTime() / 1.0E9 / ui->rtPacing->value();
     double x = _machine[AxisTag::X]->setpoint();
     double y = _machine[AxisTag::Y]->setpoint();
     double z = _machine[AxisTag::Z]->setpoint();

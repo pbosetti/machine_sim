@@ -71,13 +71,13 @@ void Axis::run() {
   double dt = 0;
   double m = effective_mass;
   double f = 0;
-  quint64 now = _timer->nsecsElapsed();
+  quint64 now = _timer->nsecsElapsed() / rt_pacing;
   _previousTime = now;
   qDebug() << "Starting thread for axis " << objectName()
            << " at time " + QString::number(now);
   while (!isInterruptionRequested()) {
     // timings
-    now = _timer->nsecsElapsed();
+    now = _timer->nsecsElapsed() / rt_pacing;
     dt = (now - _previousTime) / 1.0E9;
     _previousTime = now;
     // PID
@@ -94,8 +94,8 @@ void Axis::run() {
     QObject().thread()->usleep((unsigned long)integration_dt);
   }
   qDebug() << "Stopped thread for axis " << objectName()
-           << " at time " + QString::number(_timer->nsecsElapsed())
-            << " position " + QString::number(_position);
+           << " at time " + QString::number(now)
+           << " position " + QString::number(_position);
 }
 
 void Axis::reset() {
