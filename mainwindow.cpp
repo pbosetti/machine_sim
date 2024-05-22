@@ -246,7 +246,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->timePlot->graph(3)->addData(t, x);
     ui->timePlot->graph(4)->addData(t, y);
     ui->timePlot->graph(5)->addData(t, z);
-    ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
+    ui->timePlot->xAxis->setRange(t, ui->timePlot->xAxis->range().size(), Qt::AlignRight);
     ui->timePlot->replot();
     _xyCurvePosition->addData(x, y);
     ui->tracePlot->replot();
@@ -681,7 +681,7 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
     ui->timePlot->graph(0)->addData(t, x);
     ui->timePlot->graph(1)->addData(t, y);
     ui->timePlot->graph(2)->addData(t, z);
-    ui->timePlot->xAxis->setRange(t, 60, Qt::AlignRight);
+    ui->timePlot->xAxis->setRange(t, ui->timePlot->xAxis->range().size(), Qt::AlignRight);
     (_rapid ? _xyCurveRapid : _xyCurveInterp)->addData(x, y);
     if (_logFile.isOpen()) {
       double px = _machine[AxisTag::X]->position();
