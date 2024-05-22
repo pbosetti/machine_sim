@@ -18,7 +18,7 @@ cmake --build build
 
 then launch the `machine_sim.app` bundle in the `build` folder.
 
-For Linux users (Ubuntu 22.04), proceed as follows:
+For Linux users (Ubuntu 22.04), proceed as follows to install the prerequisites:
 
 ```bash
 cd ~
@@ -37,6 +37,11 @@ export Qt6_DIR=${QT6_INSTALL}/lib/cmake/Qt6
 cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${QT6_INSTALL}
 cmake --build build -j4
 cmake --install build
+```
+
+Ten the simulator can be build as follows:
+
+```bash
 cd ~/Devel
 git clone https://github.com/pbosetti/machine_sim.git
 cd machine_sim
@@ -47,6 +52,22 @@ export Qt6GuiTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6GuiTools
 QT_DIR=$Qt6_DIR cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j4
 ```
+
+When the repo is updated, you can rebuild the simulator by issuing the following commands:
+
+```bash
+cd ~/Devel/machine_sim
+git reset --hard
+git pull
+export Qt6CoreTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6CoreTools
+export Qt6WidgetsTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6WidgetsTools
+export Qt6Widgets_DIR=${QT6_INSTALL}/lib/cmake/Qt6Widgets
+export Qt6GuiTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6GuiTools
+QT_DIR=$Qt6_DIR cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+```
+
+Note that the `export` commands are not persistent and must be issued every time you open a new terminal window.
 
 The executable will be in the `build` folder.
 
