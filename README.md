@@ -39,7 +39,7 @@ cmake --build build -j4
 cmake --install build
 ```
 
-Ten the simulator can be build as follows:
+Ten the simulator can be built as follows:
 
 ```bash
 cd ~/Devel
