@@ -63,7 +63,6 @@ export Qt6CoreTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6CoreTools
 export Qt6WidgetsTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6WidgetsTools
 export Qt6Widgets_DIR=${QT6_INSTALL}/lib/cmake/Qt6Widgets
 export Qt6GuiTools_DIR=${QT6_INSTALL}/lib/cmake/Qt6GuiTools
-QT_DIR=$Qt6_DIR cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j4
 ```
 
