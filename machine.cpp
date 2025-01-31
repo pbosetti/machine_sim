@@ -4,6 +4,7 @@
 #include <QList>
 #include <algorithm>
 #include <math.h>
+#include <yaml-cpp/yaml.h>
 
 
 QDebug operator<<(QDebug dbg, Machine *m) {
@@ -58,26 +59,54 @@ Machine::~Machine() { stop(); }
 //        |_|                                         
 
 void Machine::loadIniFile(QString &path) {
-  auto config = toml::parse_file(path.toStdString());
-  _brokerAddress = config["MQTT"]["broker_address"].value_or("localhost");
-  _brokerPort = config["MQTT"]["broker_port"].value_or(1883);
-  _subTopic = config["MQTT"]["pub_topic"].value_or("ccnc/#");
-  _pubTopic = config["MQTT"]["sub_topic"].value_or("ccnc/#");
-  _tq = config["C-CNC"]["tq"].value_or(0.005);
+  if (path.endsWith(".ini")) {
+    auto config = toml::parse_file(path.toStdString());
+    _brokerAddress = config["MQTT"]["broker_address"].value_or("localhost");
+    _brokerPort = config["MQTT"]["broker_port"].value_or(1883);
+    _subTopic = config["MQTT"]["pub_topic"].value_or("ccnc/setpoint");
+    _pubTopic = config["MQTT"]["sub_topic"].value_or("ccnc/status#");
+    _tq = config["C-CNC"]["tq"].value_or(0.005);
 
-  for (AxisTag axis : _axesTags) {
-    _axes[axis]->length = config[_axesNames[axis]]["length"].value_or(1.0);
-    _axes[axis]->friction = config[_axesNames[axis]]["friction"].value_or(1000.0);
-    _axes[axis]->mass = config[_axesNames[axis]]["mass"].value_or(150.0);
-    _axes[axis]->effective_mass = _axes[axis]->mass;
-    _axes[axis]->max_torque = config[_axesNames[axis]]["max_torque"].value_or(20.0);
-    _axes[axis]->pitch = config[_axesNames[axis]]["pitch"].value_or(0.01);
-    _axes[axis]->gravity = config[_axesNames[axis]]["gravity"].value_or(0.0);
-    _axes[axis]->integration_dt =
-        config[_axesNames[axis]]["integration_dt"].value_or(5);
-    _axes[axis]->p = config[_axesNames[axis]]["p"].value_or(1.0);
-    _axes[axis]->i = config[_axesNames[axis]]["i"].value_or(0.0);
-    _axes[axis]->d = config[_axesNames[axis]]["d"].value_or(0.0);
+    for (auto &axis : _axesTags) {
+      auto ax = _axesNames[axis];
+      _axes[axis]->length = config[ax]["length"].value_or(1.0);
+      _axes[axis]->friction = config[ax]["friction"].value_or(1000.0);
+      _axes[axis]->mass = config[ax]["mass"].value_or(150.0);
+      _axes[axis]->effective_mass = _axes[axis]->mass;
+      _axes[axis]->max_torque = config[ax]["max_torque"].value_or(20.0);
+      _axes[axis]->pitch = config[ax]["pitch"].value_or(0.01);
+      _axes[axis]->gravity = config[ax]["gravity"].value_or(0.0);
+      _axes[axis]->integration_dt =
+          config[ax]["integration_dt"].value_or(5);
+      _axes[axis]->p = config[ax]["p"].value_or(1.0);
+      _axes[axis]->i = config[ax]["i"].value_or(0.0);
+      _axes[axis]->d = config[ax]["d"].value_or(0.0);
+    }
+  } else if (path.endsWith(".yml")) {
+    auto config = YAML::LoadFile(path.toStdString());
+    _brokerAddress = QString::fromStdString(config["mqtt"]["host"].as<std::string>("localhost"));
+    _brokerPort = config["mqtt"]["port"].as<int>(1883);
+    _subTopic = QString::fromStdString(config["mqtt"]["topics"]["pub"].as<std::string>("cnc/setpoint"));
+    _pubTopic = QString::fromStdString(config["mqtt"]["topics"]["sub"].as<std::string>("cnc/status/#"));
+    _tq = config["machine"]["tq"].as<double>(0.005);
+
+    for (auto &axis: _axesTags) {
+      auto ax = _axesNames[axis];
+      _axes[axis]->length = config["machine"]["axes"][ax]["length"].as<double>(1.0);
+      _axes[axis]->friction = config["machine"]["axes"][ax]["friction"].as<double>(1000.0);
+      _axes[axis]->mass = config["machine"]["axes"][ax]["mass"].as<double>(150.0);
+      _axes[axis]->effective_mass = _axes[axis]->mass;
+      _axes[axis]->max_torque = config["machine"]["axes"][ax]["max_torque"].as<double>(20.0);
+      _axes[axis]->pitch = config["machine"]["axes"][ax]["pitch"].as<double>(0.01);
+      _axes[axis]->gravity = config["machine"]["axes"][ax]["gravity"].as<double>(0.0);
+      _axes[axis]->integration_dt =
+          config["machine"]["axes"][ax]["integration_dt"].as<double>(5);
+      _axes[axis]->p = config["machine"]["axes"][ax]["p"].as<double>(1.0);
+      _axes[axis]->i = config["machine"]["axes"][ax]["i"].as<double>(0.0);
+      _axes[axis]->d = config["machine"]["axes"][ax]["d"].as<double>(0.0);
+    }
+  } else {
+    return;
   }
   link_axes({AxisTag::Z, AxisTag::Y, AxisTag::X});
   emit dataHasChanged();

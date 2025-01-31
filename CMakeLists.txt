@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(VERSION "0.3.9")
+set(VERSION "0.4.0")
 project(machine_sim VERSION ${VERSION} LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -12,6 +12,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Mqtt PrintSupport Charts)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Mqtt PrintSupport Charts)
+
+
+include(FetchContent)
+message(STATUS "Fetching dependencies...")
+
+FetchContent_Declare(yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_SHALLOW    TRUE
+  GIT_TAG HEAD
+)
+FetchContent_MakeAvailable(yaml-cpp)
+include_directories(${yaml-cpp_SOURCE_DIR}/include)
+
+message(STATUS "Dependencies fetched.")
+
+
+
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/constants.h.in ${CMAKE_CURRENT_LIST_DIR}/constants.h)
 
@@ -56,6 +73,7 @@ target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Mqtt)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::PrintSupport)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Charts)
+target_link_libraries(machine_sim PRIVATE yaml-cpp::yaml-cpp)
 
 set_target_properties(machine_sim PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

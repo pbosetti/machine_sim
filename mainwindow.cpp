@@ -18,6 +18,7 @@
 
 #define SETPOINT_SLIDER_MAX 100.0f
 #define BUFLEN 1024
+#define JSON_OUTPUT
 
 #define PBAR_STYLE "QProgressBar {border: 1px solid grey; border-radius: 0px;text-align: center;}\n"
 #define PBAR_STYLE_OK PBAR_STYLE "QProgressBar::chunk {background: blue}"
@@ -292,10 +293,23 @@ MainWindow::MainWindow(QWidget *parent)
   connect(_publishTimer, &QTimer::timeout, this, [this]() {
     static char buffer[BUFLEN];
     if (_rapid) {
+#ifdef JSON_OUTPUT
+      static QJsonObject obj;
+      static QJsonDocument doc;
+      std::string message;
+      obj["x"] = _machine[AxisTag::X]->position();
+      obj["y"] = _machine[AxisTag::Y]->position();
+      obj["z"] = _machine[AxisTag::Z]->position();
+      obj["error"] = _machine.error();
+      doc.setObject(obj);
+      message = doc.toJson(QJsonDocument::Compact);
+      _client->publish(_positionTopic, QByteArray(message.c_str(), message.length()));
+#else
       snprintf(buffer, BUFLEN, "%f", _machine.error());
       _client->publish(_errorTopic, QByteArray(buffer, strlen(buffer)));
       snprintf(buffer, BUFLEN, "%f,%f,%f", _machine[AxisTag::X]->position(), _machine[AxisTag::Y]->position(), _machine[AxisTag::Z]->position());
       _client->publish(_positionTopic, QByteArray(buffer, strlen(buffer)));
+#endif
     }
   });
 
@@ -474,12 +488,12 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e) {
       statusBar()->showMessage("One file only, please!");
     } else {
       QUrl url = urls.first();
-      if (url.path().endsWith(".ini")) {
+      if (url.path().endsWith(".ini") || url.path().endsWith(".yml")) {
         statusBar()->showMessage(
             QString("Release to open ") + url.toLocalFile(), 10000);
         e->acceptProposedAction();
       } else {
-        statusBar()->showMessage("Wrong file type");
+        statusBar()->showMessage("Wrong file type (.ini or .yml only)");
       }
     }
   }
@@ -673,8 +687,10 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
       y = obj["y"].toDouble() / 1000.0;
     if(!obj["z"].isNull())
       z = obj["z"].toDouble() / 1000.0;
-    if(!obj["rapid"].isNull())
+    if(!obj["rapid"].isNull() && obj["rapid"].isDouble())
       _rapid = (obj["rapid"].toInt() == 1);
+    else if(!obj["rapid"].isNull() && obj["rapid"].isBool())
+      _rapid = obj["rapid"].toBool();
     _machine[AxisTag::X]->setpoint(x);
     _machine[AxisTag::Y]->setpoint(y);
     _machine[AxisTag::Z]->setpoint(z);
