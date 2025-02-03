@@ -17,13 +17,16 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Mqtt PrintSupport
 include(FetchContent)
 message(STATUS "Fetching dependencies...")
 
-FetchContent_Declare(yaml-cpp
-  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+set(YAML_CPP_BUILD_CONTRIB OFF)
+set(YAML_CPP_BUILD_TOOLS OFF)
+set(YAML_CPP_DISABLE_UNINSTALL)
+FetchContent_Declare(yaml
+  GIT_REPOSITORY https://github.com/fktn-k/fkYAML
   GIT_SHALLOW    TRUE
   GIT_TAG HEAD
 )
-FetchContent_MakeAvailable(yaml-cpp)
-include_directories(${yaml-cpp_SOURCE_DIR}/include)
+FetchContent_MakeAvailable(yaml)
+include_directories(${yaml_SOURCE_DIR}/include)
 
 message(STATUS "Dependencies fetched.")
 
@@ -73,7 +76,7 @@ target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Mqtt)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::PrintSupport)
 target_link_libraries(machine_sim PRIVATE Qt${QT_VERSION_MAJOR}::Charts)
-target_link_libraries(machine_sim PRIVATE yaml-cpp::yaml-cpp)
+# target_link_libraries(machine_sim PRIVATE yaml-cpp::yaml-cpp)
 
 set_target_properties(machine_sim PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
