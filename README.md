@@ -92,6 +92,12 @@ You can drag and zoom on the charts by using mouse and mouse wheel, respectively
 To connect the viewer to the MQTT broker, veryfy that port and address are correct, then click on the connect button. Now you can launch the C-CNC program and see the traces of setpoints and actual axes positions.
 
 
+## Package on MacOS
+
+```sh
+~/Qt/6.8.2/macos/bin/macdeployqt build/machine_sim.app -dmg
+```
+
 
 ## Author
 

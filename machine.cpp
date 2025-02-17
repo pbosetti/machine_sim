@@ -7,6 +7,7 @@
 // #include <yaml/yaml.h>
 #include <fstream>
 #include <fkYAML/node.hpp>
+#include <fkYAML/node_type.hpp>
 
 
 QDebug operator<<(QDebug dbg, Machine *m) {
@@ -31,36 +32,15 @@ QDebug operator<<(QDebug dbg, Machine *m) {
   return dbg;
 }
 
-template <typename T>
-T get_value_or(fkyaml::node &node, T def) {
-  if constexpr (std::is_same_v<T, std::string>) {
-    if (node.is_string()) {
-      return node.get_value<T>();
-    } else {
-      return def;
-    }
-  } else if constexpr (std::is_same_v<T, int>) {
-    if (node.is_integer()) {
-      return node.get_value<T>();
-    } else {
-      return def;
-    }
-  } else if constexpr (std::is_same_v<T, double>) {
-    if (node.is_float_number() || node.is_integer()) {
-      return node.get_value<T>();
-    } else {
-      return def;
-    }
-  } else if constexpr (std::is_same_v<T, bool>) {
-    if (node.is_boolean()) {
-      return node.get_value<T>();
-    } else {
-      return def;
-    }
-  } else {
-    return def;
-  }
-}
+
+// template <typename T>
+// T get_value_or(fkyaml::node &node, T def) {
+//   if (node.get_type() == fkyaml::node_type::NULL_OBJECT) {
+//     return def;
+//   } else {
+//     return node.get_value<T>();
+//   }
+// }
 
 
 //   _     _  __                      _      
@@ -116,28 +96,28 @@ void Machine::loadIniFile(QString &path) {
       _axes[axis]->d = config[ax]["d"].value_or(0.0);
     }
   } else if (path.endsWith(".yml")) {
-      std::ifstream ifs(path.toStdString());
-      auto config = fkyaml::node::deserialize(ifs);
-      _brokerAddress = QString::fromStdString(get_value_or<std::string>(config["mqtt"]["host"], "localhost"));
-      _brokerPort = get_value_or<int>(config["mqtt"]["port"], 1883);
-      _subTopic = QString::fromStdString(get_value_or<std::string>(config["mqtt"]["topics"]["pub"], "cnc/setpoint"));
-      _pubTopic = QString::fromStdString(get_value_or<std::string>(config["mqtt"]["topics"]["sub"], "cnc/status/#"));
-      _tq = get_value_or<double>(config["machine"]["tq"], 0.005);
+    std::ifstream ifs(path.toStdString());
+    auto config = fkyaml::node::deserialize(ifs);
+    _brokerAddress = QString::fromStdString(config["mqtt"]["host"].get_value_or<std::string>("localhost"));
+    _brokerPort = config["mqtt"]["port"].get_value_or<int>(1883);
+    _subTopic = QString::fromStdString(config["mqtt"]["topics"]["pub"].get_value_or<std::string>("cnc/setpoint"));
+    _pubTopic = QString::fromStdString(config["mqtt"]["topics"]["sub"].get_value_or<std::string>("cnc/status/#"));
+    _tq = config["machine"]["tq"].get_value_or<double>(0.005);
 
     for (auto &axis: _axesTags) {
       auto ax = _axesNames[axis];
-      _axes[axis]->length = get_value_or<double>(config["machine"]["axes"][ax]["length"], 1.0);
-      _axes[axis]->friction = get_value_or<double>(config["machine"]["axes"][ax]["friction"], 1000.0);
-      _axes[axis]->mass = get_value_or<double>(config["machine"]["axes"][ax]["mass"], 150.0);
+      _axes[axis]->length = config["machine"]["axes"][ax]["length"].get_value_or<double>(1.0);
+      _axes[axis]->friction = config["machine"]["axes"][ax]["friction"].get_value_or<double>(1000.0);
+      _axes[axis]->mass = config["machine"]["axes"][ax]["mass"].get_value_or<double>(150.0);
       _axes[axis]->effective_mass = _axes[axis]->mass;
-      _axes[axis]->max_torque = get_value_or<double>(config["machine"]["axes"][ax]["max_torque"], 20.0);
-      _axes[axis]->pitch = get_value_or<double>(config["machine"]["axes"][ax]["pitch"], 0.01);
-      _axes[axis]->gravity = get_value_or<double>(config["machine"]["axes"][ax]["gravity"], 0.0);
+      _axes[axis]->max_torque = config["machine"]["axes"][ax]["max_torque"].get_value_or<double>(20.0);
+      _axes[axis]->pitch = config["machine"]["axes"][ax]["pitch"].get_value_or<double>(0.01);
+      _axes[axis]->gravity = config["machine"]["axes"][ax]["gravity"].get_value_or<double>(0.0);
       _axes[axis]->integration_dt =
-          get_value_or<double>(config["machine"]["axes"][ax]["integration_dt"], 5);
-      _axes[axis]->p = get_value_or<double>(config["machine"]["axes"][ax]["p"], 1.0);
-      _axes[axis]->i = get_value_or<double>(config["machine"]["axes"][ax]["i"], 0.0);
-      _axes[axis]->d = get_value_or<double>(config["machine"]["axes"][ax]["d"], 0.0);
+          config["machine"]["axes"][ax]["integration_dt"].get_value_or<double>(5);
+      _axes[axis]->p = config["machine"]["axes"][ax]["p"].get_value_or<double>(1.0);
+      _axes[axis]->i = config["machine"]["axes"][ax]["i"].get_value_or<double>(0.0);
+      _axes[axis]->d = config["machine"]["axes"][ax]["d"].get_value_or<double>(0.0);
     }
   } else {
     return;
@@ -147,19 +127,19 @@ void Machine::loadIniFile(QString &path) {
 }
 
 void Machine::start() {
-  for (AxisTag axis : _axesTags) {
+  for (AxisTag &axis : _axesTags) {
     _axes[axis]->start();
   }
 }
 
 void Machine::stop() {
-  for (AxisTag axis : _axesTags) {
+  for (AxisTag &axis : _axesTags) {
     _axes[axis]->requestInterruption();
   }
 }
 
 void Machine::reset() {
-  for (AxisTag axis : _axesTags) {
+  for (AxisTag &axis : _axesTags) {
     _axes[axis]->reset();
   }
 //  emit dataHasChanged();

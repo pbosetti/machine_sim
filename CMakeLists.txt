@@ -23,7 +23,7 @@ set(YAML_CPP_DISABLE_UNINSTALL)
 FetchContent_Declare(yaml
   GIT_REPOSITORY https://github.com/fktn-k/fkYAML
   GIT_SHALLOW    TRUE
-  GIT_TAG HEAD
+  GIT_TAG 16a1432281bf72f6120f41e27691813afa6abafc
 )
 FetchContent_MakeAvailable(yaml)
 include_directories(${yaml_SOURCE_DIR}/include)
