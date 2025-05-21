@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(VERSION "0.4.1")
+set(VERSION "0.4.2")
 project(machine_sim VERSION ${VERSION} LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -23,7 +23,7 @@ set(YAML_CPP_DISABLE_UNINSTALL)
 FetchContent_Declare(yaml
   GIT_REPOSITORY https://github.com/fktn-k/fkYAML
   GIT_SHALLOW    TRUE
-  GIT_TAG 16a1432281bf72f6120f41e27691813afa6abafc
+  GIT_TAG HEAD
 )
 FetchContent_MakeAvailable(yaml)
 include_directories(${yaml_SOURCE_DIR}/include)
