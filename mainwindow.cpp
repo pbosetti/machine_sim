@@ -124,7 +124,9 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(ui->parametersButton, SIGNAL(clicked(bool)), this, SLOT(on_actionSetParameters_triggered()));
 
-  connect(ui->resetButton, &QPushButton::clicked, this, [=]() {_machine.reset();});
+  connect(ui->resetButton, &QPushButton::clicked, this, [=]() {
+    _machine.reset();
+  });
 
   connect(ui->rtPacing, &QDoubleSpinBox::valueChanged, this, [=](double v) {
     _machine[AxisTag::X]->rt_pacing = v;
@@ -706,6 +708,16 @@ void MainWindow::on_mqttMessage(const QByteArray &message,
       QString line = QString::asprintf("%.3f %d %.3f %.3f %.3f %.3f %.3f %.3f\n", t, _rapid, x, y, z, px, py, pz);
       _logFile.write(line.toStdString().c_str());
     }
+    toggleFormConections(Off);
+    int xpos = x / _machine[AxisTag::X]->length * 100;
+    int ypos = y / _machine[AxisTag::Y]->length * 100;
+    int zpos = z / _machine[AxisTag::Z]->length * 100;
+    qDebug() << "Length: " << _machine[AxisTag::X]->length << " x: " << x
+              << " ratio: " << xpos;
+    ui->setPointXSlider->setSliderPosition(xpos);
+    ui->setPointYSlider->setSliderPosition(ypos);
+    ui->setPointZSlider->setSliderPosition(zpos);
+    toggleFormConections(On);
   } else if (topic.name().endsWith(QString("position"))) {
 
   }
