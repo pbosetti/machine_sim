@@ -1,20 +1,21 @@
 #include "mainwindow.h"
-#include "machine.h"
-#include "ui_mainwindow.h"
-#include "machine_params.h"
-#include "doubleclickslider.h"
 #include "constants.h"
+#include "doubleclickslider.h"
+#include "fkYAML/exception.hpp"
+#include "machine.h"
+#include "machine_params.h"
+#include "ui_mainwindow.h"
+#include <QBarSet>
 #include <QDebug>
 #include <QDragEnterEvent>
 #include <QDragLeaveEvent>
 #include <QDropEvent>
 #include <QFileDialog>
-#include <QMimeData>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QMimeData>
 #include <QSettings>
-#include <QBarSet>
 
 #define SETPOINT_SLIDER_MAX 100.0f
 #define BUFLEN 1024
@@ -510,7 +511,12 @@ void MainWindow::dropEvent(QDropEvent *e) {
   QUrl url = e->mimeData()->urls().first();
   QString fileName = url.toLocalFile();
   statusBar()->showMessage(QString("Opening ") + fileName);
-  _machine.loadIniFile(fileName);
+  try {
+    _machine.loadIniFile(fileName);
+  } catch (fkyaml::parse_error &e) {
+    statusBar()->showMessage(QString("Error parsing ") + fileName);
+  }
+
   setupMachineAfterNewINI();
 }
 

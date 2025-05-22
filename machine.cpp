@@ -77,7 +77,7 @@ void Machine::loadIniFile(QString &path) {
     _brokerAddress = config["MQTT"]["broker_address"].value_or("localhost");
     _brokerPort = config["MQTT"]["broker_port"].value_or(1883);
     _subTopic = config["MQTT"]["pub_topic"].value_or("ccnc/setpoint");
-    _pubTopic = config["MQTT"]["sub_topic"].value_or("ccnc/status#");
+    _pubTopic = config["MQTT"]["sub_topic"].value_or("ccnc/status/#");
     _tq = config["C-CNC"]["tq"].value_or(0.005);
 
     for (auto &axis : _axesTags) {
@@ -98,10 +98,10 @@ void Machine::loadIniFile(QString &path) {
   } else if (path.endsWith(".yml")) {
     std::ifstream ifs(path.toStdString());
     auto config = fkyaml::node::deserialize(ifs);
-    _brokerAddress = QString::fromStdString(config["mqtt"]["host"].get_value_or<std::string>("localhost"));
-    _brokerPort = config["mqtt"]["port"].get_value_or<int>(1883);
-    _subTopic = QString::fromStdString(config["mqtt"]["topics"]["pub"].get_value_or<std::string>("cnc/setpoint"));
-    _pubTopic = QString::fromStdString(config["mqtt"]["topics"]["sub"].get_value_or<std::string>("cnc/status/#"));
+    _brokerAddress = QString::fromStdString(config["machine"]["mqtt"]["host"].get_value_or<std::string>("localhost"));
+    _brokerPort = config["machine"]["mqtt"]["port"].get_value_or<int>(1883);
+    _subTopic = QString::fromStdString(config["machine"]["mqtt"]["topics"]["pub"].get_value_or<std::string>("cnc/setpoint"));
+    _pubTopic = QString::fromStdString(config["machine"]["mqtt"]["topics"]["sub"].get_value_or<std::string>("cnc/status/#"));
     _tq = config["machine"]["tq"].get_value_or<double>(0.005);
 
     for (auto &axis: _axesTags) {
