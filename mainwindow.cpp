@@ -295,7 +295,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(_publishTimer, &QTimer::timeout, this, [this]() {
     static char buffer[BUFLEN];
-    if (_rapid) {
+    // if (_rapid) {
 #ifdef JSON_OUTPUT
       static QJsonObject obj;
       static QJsonDocument doc;
@@ -313,7 +313,7 @@ MainWindow::MainWindow(QWidget *parent)
       snprintf(buffer, BUFLEN, "%f,%f,%f", _machine[AxisTag::X]->position(), _machine[AxisTag::Y]->position(), _machine[AxisTag::Z]->position());
       _client->publish(_positionTopic, QByteArray(buffer, strlen(buffer)));
 #endif
-    }
+    // }
   });
 
   connect(ui->logButton, &QPushButton::clicked, this, &MainWindow::logButton_triggered);
